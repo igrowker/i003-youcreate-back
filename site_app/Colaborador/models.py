@@ -1,4 +1,6 @@
 from django.db import models
+from Usuario.models import Usuario
+
 
 # Create your models here.
 class Colaborador(models.Model):
@@ -6,4 +8,4 @@ class Colaborador(models.Model):
     nombre = models.CharField(max_length=255)
     servicio = models.CharField(max_length=255)
     monto = models.DecimalField(max_digits=10, decimal_places=2)
-    usuario_id = models.ForeignKey('Usuario', on_delete=models.CASCADE)
+    usuario_id = models.ForeignKey(Usuario, on_delete=models.CASCADE)
