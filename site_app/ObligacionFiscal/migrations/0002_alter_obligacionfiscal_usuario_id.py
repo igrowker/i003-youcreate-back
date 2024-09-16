@@ -5,16 +5,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ObligacionFiscal', '0001_initial'),
-        ('Usuario', '0001_initial'),
+        ("ObligacionFiscal", "0001_initial"),
+        ("Usuario", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='obligacionfiscal',
-            name='usuario_id',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Usuario.usuario'),
+            model_name="obligacionfiscal",
+            name="usuario_id",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="Usuario.usuario"
+            ),
         ),
     ]
