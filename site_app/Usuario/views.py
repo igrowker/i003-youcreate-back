@@ -1,10 +1,16 @@
-from django.urls import path
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-# from django.contrib.auth.decorators import login_required
-from rest_framework_simplejwt.views import TokenVerifyView
+from .serializers import CustomTokenObtainPairSerializer, RegisterSerializer
+from .models import CustomUser as Usuario
 
-# TODO: Add login required decorator to the relevant views
+class RegisterView(generics.CreateAPIView):
+    queryset = Usuario.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
 
-urlpatterns = [
-    path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
-]
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    permission_classes = (AllowAny,)
+    serializer_class = CustomTokenObtainPairSerializer

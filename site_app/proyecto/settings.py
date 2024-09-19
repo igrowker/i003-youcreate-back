@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 from datetime import timedelta
 
@@ -32,6 +33,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 
 # Application definition
 
@@ -42,13 +49,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "Usuario.apps.UsuarioConfig",
     "Colaborador",
     "Ingreso",
     "PagoColaborador",
-    "Usuario",
     "ObligacionFiscal",
+    "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 REST_FRAMEWORK = {
@@ -59,24 +68,31 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=60),
-    "ROTATE_REFRESH_TOKENS": False,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=5
+    ),  # Sets the expiration time of the access token
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        minutes=15
+    ),  # Sets the expiration time of the refresh token
+    "ROTATE_REFRESH_TOKENS": True,  # Automatically rotates the refresh tokens every time a new access token is generated
+    "BLACKLIST_AFTER_ROTATION": True,  # Automatically blacklists tokens that have expired or have been rotated
+    # TODO: Add Cron job to flush blacklisted tokens
     "UPDATE_LAST_LOGIN": False,
-    "ALGORITHM": "HS256",
-    "SIGNING_KEY": os.getenv("SECRET_KEY"),
+    "ALGORITHM": "HS256",  # Hash algorithm used to sign the access and refresh tokens (HS256: Symmetric encryption)
+    "SIGNING_KEY": os.getenv(
+        "SECRET_KEY"
+    ),  # Signing key used to sign the access and refresh tokens
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
-    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(minutes=90),
+    "TOKEN_OBTAIN_SERIALIZER": "Usuario.serializers.CustomTokenObtainPairSerializer",
 }
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Added CORS headers Middleware
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -116,11 +132,15 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = "Usuario.CustomUser"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "Usuario.auth_backend.CustomPasswordValidator",
+    },
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
@@ -135,6 +155,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# AUTHENTICATION_BACKENDS = [
+#     "Usuario.auth_backend.CustomAuthBackend",
+# ]
+
 # Security settings
 # SECURE_SSL_REDIRECT = True
 # SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -146,8 +170,8 @@ AUTH_PASSWORD_VALIDATORS = [
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
-    "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
 

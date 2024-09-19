@@ -1,11 +1,8 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-# from django.contrib.auth.hashers import make_password
-
-# TODO: Check possibility of using the django make_password() function to encrypt passwords
-#  check_password() function to verify them
 
 
-class Usuario(models.Model):
+class CustomUser(AbstractUser):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
     apellido = models.CharField(max_length=255)
@@ -15,3 +12,12 @@ class Usuario(models.Model):
     verificado = models.BooleanField(default=False)
     pais_residencia = models.CharField(max_length=255)
     redes_sociales = models.JSONField()
+    activo = models.BooleanField(default=True)
+
+    USERNAME_FIELD = "correo"
+    REQUIRED_FIELDS = ["username", "nombre", "apellido", "pais_residencia", "password", "redes_sociales"]
+
+    class Meta:
+        db_table = "auth_user"
+        verbose_name = "Usuario"
+        verbose_name_plural = "Usuarios"
