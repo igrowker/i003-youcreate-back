@@ -20,5 +20,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', include('ObligacionFiscal.urls')),  # Incluir las rutas de la aplicación
+    path('api/', include('ObligacionFiscal.urls')),
+    path('api/usuarios/', include('Usuario.urls')),
+    path('api/ingresos/', include('Ingreso.urls')),
+    path('api/pagos-colaboradores/', include('PagoColaborador.urls')),
+    path('api/colaboradores/', include('Colaborador.urls')),
 ]
