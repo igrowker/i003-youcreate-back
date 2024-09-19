@@ -1,4 +1,5 @@
 from django.db import models
+
 from Usuario.models import Usuario # Importamos el modelo de usuarios de Django
 
 
@@ -10,4 +11,4 @@ class ObligacionFiscal(models.Model):
     usuario_id = models.ForeignKey(Usuario, on_delete=models.CASCADE)# Relación con el usuario
 
 def __str__(self):
-        return f"{self.tipo_impuesto} - {self.monto_a_pagar}"
+        return f"{self.tipo_impuesto} - {self.monto_a_pagar}

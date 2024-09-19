@@ -18,3 +18,4 @@ class ObligacionesFiscalesController(APIView):
         # Serializamos las obligaciones
         serializer = ObligacionFiscalSerializer(obligaciones, many=True)
         return Response(serializer.data)
+

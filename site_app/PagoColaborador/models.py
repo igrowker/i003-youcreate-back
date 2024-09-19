@@ -12,3 +12,4 @@ class PagoColaborador(models.Model):
     def __str__(self):
         return f'{self.colaborador} - {self.monto}'
 
+
