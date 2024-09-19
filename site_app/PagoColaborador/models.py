@@ -8,6 +8,7 @@ class PagoColaborador(models.Model):
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_pago = models.DateField()
     colaborador_id = models.ForeignKey(Colaborador, on_delete=models.CASCADE)
-
+    
     def __str__(self):
         return f'{self.colaborador} - {self.monto}'
+

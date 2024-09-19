@@ -5,3 +5,4 @@ class PagoColaboradorSerializer(serializers.ModelSerializer):
     class Meta:
         model = PagoColaborador
         fields = '__all__'
+
