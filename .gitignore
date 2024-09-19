@@ -69,4 +69,4 @@ secrets.json
 
 # Archivos de control de versiones de Django y bases de datos locales
 db.*
-site_app/db.sqlite3.copy
+db.sqlite3
