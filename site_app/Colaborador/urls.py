@@ -1,7 +1,10 @@
-from django.urls import path
-from .views import ColaboradorListCreate, ColaboradorRetrieveUpdateDestroy
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ColaboradorViewSet
+
+router = DefaultRouter()
+router.register(r'colaboradores', ColaboradorViewSet)
 
 urlpatterns = [
-    path('', ColaboradorListCreate.as_view(), name='colaborador-list-create'),
-    path('<int:pk>/', ColaboradorRetrieveUpdateDestroy.as_view(), name='colaborador-detail'),
+    path('', include(router.urls)),
 ]

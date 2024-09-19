@@ -1,3 +1,4 @@
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -17,4 +18,3 @@ class ObligacionesFiscalesController(APIView):
         # Serializamos las obligaciones
         serializer = ObligacionFiscalSerializer(obligaciones, many=True)
         return Response(serializer.data)
-
