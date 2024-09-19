@@ -1,7 +1,10 @@
-from django.urls import path
-from .views import PagoColaboradorListCreate, PagoColaboradorRetrieveUpdateDestroy
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import PagoColaboradorViewSet
+
+router = DefaultRouter()
+router.register(r'pagos-colaboradores', PagoColaboradorViewSet)
 
 urlpatterns = [
-    path('', PagoColaboradorListCreate.as_view(), name='pagocolaborador-list-create'),
-    path('<int:pk>/', PagoColaboradorRetrieveUpdateDestroy.as_view(), name='pagocolaborador-detail'),
+    path('', include(router.urls)),
 ]

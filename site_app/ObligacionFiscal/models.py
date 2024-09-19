@@ -11,11 +11,3 @@ class ObligacionFiscal(models.Model):
 
 def __str__(self):
         return f"{self.tipo_impuesto} - {self.monto_a_pagar}"
-"""
-Comentarios:
-
-models.CharField: Define un campo de texto.
-models.DecimalField: Almacena un número decimal con un máximo de 10 dígitos, de los cuales 2 serán decimales.
-models.DateField: Almacena una fecha.
-models.ForeignKey: Crea una relación entre ObligacionFiscal y User. Cuando un usuario sea eliminado, todas sus obligaciones fiscales también serán eliminadas (on_delete=models.CASCADE).
-"""

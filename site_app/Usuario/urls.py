@@ -1,7 +1,14 @@
+
+from django.contrib import admin
 from django.urls import path
-from .views import UsuarioListCreate, UsuarioRetrieveUpdateDestroy
+from . import views
+from .views import CustomTokenObtainPairView
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+)
 
 urlpatterns = [
-    path('', UsuarioListCreate.as_view(), name='usuario-list-create'),
-    path('<int:pk>/', UsuarioRetrieveUpdateDestroy.as_view(), name='usuario-detail'),
+    path("login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("login/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("register/", views.RegisterView.as_view(), name="register"),
 ]

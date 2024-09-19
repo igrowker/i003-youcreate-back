@@ -1,16 +1,16 @@
-from django.shortcuts import render
-
-# Create your views here.
 from rest_framework import generics
-from .models import Usuario
-from .serializers import UsuarioSerializer
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-#para listar y crear usuarios
-class UsuarioListCreate(generics.ListCreateAPIView):
-    queryset = Usuario.objects.all()
-    serializer_class = UsuarioSerializer
+from .serializers import CustomTokenObtainPairSerializer, RegisterSerializer
+from .models import CustomUser as Usuario
 
-#para obtener, actualizar y eliminar un usuario por su id
-class UsuarioRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+class RegisterView(generics.CreateAPIView):
     queryset = Usuario.objects.all()
-    serializer_class = UsuarioSerializer
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    permission_classes = (AllowAny,)
+    serializer_class = CustomTokenObtainPairSerializer
