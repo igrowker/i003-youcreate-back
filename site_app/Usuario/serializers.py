@@ -1,3 +1,4 @@
+
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -76,3 +77,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["id"] = usuario.id
         token["pais"] = usuario.pais_residencia
         return token
+

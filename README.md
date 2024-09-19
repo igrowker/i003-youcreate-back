@@ -13,6 +13,7 @@
 # Run the server
     python manage.py runserver
 
+
 # Check dependencies
     pip freeze
 # Create requirements.txt
