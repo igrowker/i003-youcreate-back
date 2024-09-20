@@ -2,12 +2,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .services import ObligacionesFiscalesService
 from .repositories import ObligacionesFiscalesRepository
 
 class ObligacionesFiscalesController(APIView):
-    permission_classes = [IsAuthenticated]  # Asegura que el usuario esté autenticado
+    permission_classes = [AllowAny]  # Asegura que el usuario esté autenticado
 
     def get(self, request):
         """Obtiene las obligaciones fiscales personalizadas del usuario autenticado"""
@@ -18,7 +18,9 @@ class ObligacionesFiscalesController(APIView):
 
     def post(self, request):
         """Calcula y almacena nuevas obligaciones fiscales para el usuario autenticado"""
-        usuario_id = request.user.id  # Obtener el ID del usuario autenticado
-        servicio = ObligacionesFiscalesService(usuario_id)
+        usuario = request.user  
+        if not usuario.is_authenticated:
+            return Response({"error": "Usuario no autenticado."}, status=status.HTTP_401_UNAUTHORIZED)
+        servicio = ObligacionesFiscalesService(usuario)
         servicio.manejar_obligaciones()
         return Response({"mensaje": "Obligaciones fiscales calculadas y almacenadas."}, status=status.HTTP_201_CREATED)
