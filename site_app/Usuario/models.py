@@ -5,6 +5,7 @@ from django.db import models
 
 class CustomUser(AbstractUser):
     id = models.AutoField(primary_key=True)
+    username = models.CharField(max_length=255, unique=True)
     nombre = models.CharField(max_length=255)
     apellido = models.CharField(max_length=255)
     correo = models.EmailField(unique=True, max_length=255)
@@ -16,7 +17,7 @@ class CustomUser(AbstractUser):
     activo = models.BooleanField(default=True)
 
     USERNAME_FIELD = "correo"
-    REQUIRED_FIELDS = ["username", "nombre", "apellido", "pais_residencia", "password", "redes_sociales"]
+    REQUIRED_FIELDS = ["nombre", "apellido", "pais_residencia", "password", "redes_sociales"]
 
     class Meta:
         db_table = "auth_user"
