@@ -2,7 +2,7 @@ from .repository import IngresosRepository
 #Servicio que va ser utilizado por el controlador
 class IngresosService:
     def obtener_ingresos_usuario(self, usuario_id) -> dict:
-        ingresos = self.ingresos_repository.obtener_ingresos_usuario(usuario_id)
+        ingresos = IngresosRepository.obtener_ingresos_usuario(usuario_id)
         #inicializo dict para agregar ingresos por origen 
         ingresos_por_origen = {}
         #par cada uno de los ingresos del array 
@@ -16,7 +16,10 @@ class IngresosService:
         return ingresos_por_origen
 
     def obtener_ingresos_totales(self, usuario_id) -> dict:
-        return self.ingresos_repository.obtener_ingresos_totales(usuario_id)
+        return IngresosRepository.obtener_ingresos_totales(usuario_id)
     
     def obtener_ingresos_por_fecha(self, usuario_id) -> dict:
-        return self.ingresos_repository.obtener_ingresos_por_fecha(usuario_id)
+        return IngresosRepository.obtener_ingresos_por_fecha(usuario_id)
+    
+    def obtener_ingresos_filtrados(self, usuario_id, mes, anio) -> dict:
+        return IngresosRepository.obtener_ingresos_por_mes_y_anio(usuario_id, mes, anio)
