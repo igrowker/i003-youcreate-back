@@ -1,11 +1,15 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod  # Importa herramientas para definir clases abstractas
 
 class ObligacionesFiscalesStrategy(ABC):
     """
-    Interfaz para definir la estrategia fiscal de cada país.
-    Cada país debe implementar esta interfaz y proporcionar su propia lógica fiscal.
+    Interfaz abstracta que define la estrategia fiscal para cada país.
+    Cada país que implemente esta interfaz debe proporcionar su propia lógica fiscal.
     """
 
     @abstractmethod
     def calcular_obligaciones(self):
-        pass
+        """
+        Método abstracto que debe ser implementado por cada estrategia fiscal de país.
+        Debe contener la lógica para calcular las obligaciones fiscales.
+        """
+        pass  # La implementación específica de este método será proporcionada en las clases hijas

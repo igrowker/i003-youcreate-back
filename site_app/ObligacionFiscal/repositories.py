@@ -19,7 +19,6 @@ class ObligacionesFiscalesRepository:
         )
         
         if obligaciones_existentes.exists():
-            print(f"Obligación fiscal para {tipo_impuesto} ya existe para este mes.")
             return obligaciones_existentes.first()  # Retorna el registro existente
         
         # Si no existe, crea un nuevo registro
@@ -29,5 +28,4 @@ class ObligacionesFiscalesRepository:
             monto_a_pagar=monto_a_pagar,
             fecha_vencimiento=fecha_vencimiento
         )
-        print(f"Obligación fiscal guardada: {obligacion}")
         return obligacion
