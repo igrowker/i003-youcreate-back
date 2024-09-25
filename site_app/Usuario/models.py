@@ -15,6 +15,7 @@ class CustomUser(AbstractUser):
     pais_residencia = models.CharField(max_length=255)
     redes_sociales = models.JSONField()
     activo = models.BooleanField(default=True)
+    monotributo = models.BooleanField(default=False)
 
     USERNAME_FIELD = "correo"
     REQUIRED_FIELDS = ["nombre", "apellido", "pais_residencia", "password", "redes_sociales"]
