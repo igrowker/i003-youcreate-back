@@ -1,4 +1,4 @@
-
+from datetime import timedelta
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -49,7 +49,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=5
+        minutes=99999
     ),  # Sets the expiration time of the access token
     "REFRESH_TOKEN_LIFETIME": timedelta(
         minutes=15

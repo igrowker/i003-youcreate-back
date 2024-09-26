@@ -1,9 +1,19 @@
 from .models import PagoColaborador
+from Colaborador.models import Colaborador  # Asegúrate de importar el modelo Colaborador
 
 class PagosColaboradoresService:
+    
     @staticmethod
     def registrar_pago(colaborador_id, monto, fecha_pago, descripcion):
-        pago = PagoColaborador(colaborador_id=colaborador_id, monto=monto, fecha_pago=fecha_pago, descripcion=descripcion)
+        # Obtener la instancia del colaborador usando el ID
+        colaborador = Colaborador.objects.get(id=colaborador_id)
+        # Crear el PagoColaborador usando la instancia del colaborador
+        pago = PagoColaborador(
+            colaborador_id=colaborador,
+            monto=monto,
+            fecha_pago=fecha_pago,
+            descripcion=descripcion
+        )
         pago.save()
         return pago
 
