@@ -12,7 +12,6 @@ class PagoColaboradorPagination(PageNumberPagination):
     page_size = 10
 
 class PagoColaboradorViewSet(viewsets.ModelViewSet):
-    # Ordenar por id
     queryset = PagoColaborador.objects.all().order_by('id')  
     serializer_class = PagoColaboradorSerializer
     pagination_class = PagoColaboradorPagination 
@@ -38,11 +37,8 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
             return Response({"detail": str(e)}, status=400)
 
     def list(self, request, *args, **kwargs):
-        colaborador_id = request.query_params.get('colaborador_id')
-        if colaborador_id:
-            pagos = self.queryset.filter(colaborador_id=colaborador_id)
-        else:
-            pagos = self.get_queryset()
+        # Obtiene todos los pagos, sin filtrar por colaborador_id
+        pagos = self.get_queryset()  # Esto obtiene todos los pagos
 
         page = self.paginate_queryset(pagos)
         if page is not None:
