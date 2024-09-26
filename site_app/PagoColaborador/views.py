@@ -12,7 +12,8 @@ class PagoColaboradorPagination(PageNumberPagination):
     page_size = 10
 
 class PagoColaboradorViewSet(viewsets.ModelViewSet):
-    queryset = PagoColaborador.objects.all()
+    # Ordenar por id
+    queryset = PagoColaborador.objects.all().order_by('id')  
     serializer_class = PagoColaboradorSerializer
     pagination_class = PagoColaboradorPagination 
     permission_classes = [IsAuthenticated]
@@ -31,7 +32,7 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
 
         # Llamar al servicio para registrar el pago
         try:
-            pago = PagosColaboradoresService.registrar_pago(colaborador, monto, fecha_pago, descripcion)
+            pago = PagosColaboradoresService.registrar_pago(colaborador_id, monto, fecha_pago, descripcion)
             serializer = self.get_serializer(pago)
             return Response(serializer.data, status=201)
         except Exception as e:
@@ -52,3 +53,17 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(pagos, many=True)
         return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        # Obtener el pago por ID
+        try:
+            pago = self.get_object()
+        except PagoColaborador.DoesNotExist:
+            return Response({"detail": "Pago no encontrado."}, status=404)
+
+        # Actualizar los campos del pago
+        serializer = self.get_serializer(pago, data=request.data, partial=True)  # `partial=True` permite actualizaciones parciales
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)

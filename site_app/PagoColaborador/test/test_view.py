@@ -36,27 +36,67 @@ class TestPagoColaboradorViews(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
 
     def test_lista_pagos(self):
-        # Crear un pago antes de listar
+        # Crear dos pagos antes de listar
         PagoColaborador.objects.create(
-            colaborador_id=self.colaborador,  # Usa la instancia de Colaborador
-            monto=2000.00,
+            colaborador_id=self.colaborador,
+            monto=2000.00,  
             fecha_pago=date.today(),
-            descripcion='Pago Test'
+            descripcion='Pago Test 1'
+        )
+        PagoColaborador.objects.create(
+            colaborador_id=self.colaborador,
+            monto=1500.00,
+            fecha_pago=date.today(),
+            descripcion='Pago Test 2'
         )
         
         response = self.client.get(reverse('pagocolaborador-list'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Pago Test")  # Verifica que el pago esté en la respuesta
+        
+        # Verificar que ambos pagos están en la respuesta
+        self.assertContains(response, "Pago Test 1")
+        self.assertContains(response, "Pago Test 2")
 
     def test_crear_pago_view(self):
         response = self.client.post(reverse('pagocolaborador-list'), {
-            'colaborador_id': self.colaborador.id,  # Asegúrate de usar 'colaborador' y no 'colaborador_id'
+            'colaborador_id': self.colaborador.id,  # Usa el ID del colaborador que ya existe
             'monto': 2000.00,
-            'fecha_pago': date.today().strftime('%Y-%m-%d'),
-            'descripcion': 'Nuevo pago'
+            'fecha_pago': date.today().strftime('%Y-%m-%d'),  # Formato adecuado para la fecha
+            'descripcion': 'Pago Test',
         })
-        self.assertEqual(response.status_code, 201)  # Verifica que el estado sea 201
+
+        # Verifica que la respuesta tenga un código de estado 201 (creado)
+        self.assertEqual(response.status_code, 201)
+
+        # Verifica que el pago se ha creado en la base de datos
+        self.assertEqual(PagoColaborador.objects.count(), 1)
+        self.assertEqual(PagoColaborador.objects.first().descripcion, 'Pago Test')
+
+    def test_actualizar_pago(self):
+        # Crear un pago para actualizar
+        pago = PagoColaborador.objects.create(
+            colaborador_id=self.colaborador,
+            monto=2000.00,  
+            fecha_pago=date.today(),
+            descripcion='Pago Test'
+        )
+
+        response = self.client.patch(reverse('pagocolaborador-detail', args=[pago.id]), {
+            'monto': 2500.00,
+            'descripcion': 'Pago Actualizado'
+        })
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, 'Pago Actualizado')
+
+        pago.refresh_from_db() 
+        self.assertEqual(pago.monto, 2500.00)
+        self.assertEqual(pago.descripcion, 'Pago Actualizado')
 
     def tearDown(self):
+        # Eliminar todos los pagos relacionados con el colaborador
+        PagoColaborador.objects.filter(colaborador_id=self.colaborador).delete()
+        # Eliminar el colaborador y el usuario
         self.colaborador.delete()
         self.usuario.delete()

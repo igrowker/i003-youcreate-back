@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "Ingreso",
     "PagoColaborador",
     "ObligacionFiscal",
+    'ActionLog',
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
