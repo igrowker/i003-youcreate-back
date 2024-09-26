@@ -5,15 +5,13 @@ class PagosColaboradoresService:
     
     @staticmethod
     def registrar_pago(colaborador_id, monto, fecha_pago, descripcion):
-        # Obtener la instancia del colaborador usando el ID
         try:
             colaborador = Colaborador.objects.get(id=colaborador_id)
         except Colaborador.DoesNotExist:
             raise ValueError("El colaborador no existe")
 
-        # Crear el PagoColaborador usando la instancia del colaborador
         pago = PagoColaborador(
-            colaborador_id=colaborador,  # Asignar la instancia completa
+            colaborador_id=colaborador,  
             monto=monto,
             fecha_pago=fecha_pago,
             descripcion=descripcion

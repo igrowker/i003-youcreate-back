@@ -30,7 +30,6 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
         except Colaborador.DoesNotExist:
             return Response({"detail": "Colaborador no encontrado."}, status=404)
 
-        # Llamar al servicio para registrar el pago
         try:
             pago = PagosColaboradoresService.registrar_pago(colaborador_id, monto, fecha_pago, descripcion)
             serializer = self.get_serializer(pago)
@@ -45,7 +44,6 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
         else:
             pagos = self.get_queryset()
 
-        # Aplicar paginación
         page = self.paginate_queryset(pagos)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -55,14 +53,12 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        # Obtener el pago por ID
         try:
             pago = self.get_object()
         except PagoColaborador.DoesNotExist:
             return Response({"detail": "Pago no encontrado."}, status=404)
 
-        # Actualizar los campos del pago
-        serializer = self.get_serializer(pago, data=request.data, partial=True)  # `partial=True` permite actualizaciones parciales
+        serializer = self.get_serializer(pago, data=request.data, partial=True) 
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

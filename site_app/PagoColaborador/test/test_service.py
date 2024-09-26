@@ -21,7 +21,7 @@ class TestPagosColaboradoresService(TestCase):
         
         self.colaborador = Colaborador.objects.create(
             nombre="Colaborador Test",
-            servicio="Servicio Test",  # Agrega el campo servicio si lo tienes en el modelo
+            servicio="Servicio Test",  
             monto=100.00,
             usuario=self.usuario
         )
@@ -34,7 +34,7 @@ class TestPagosColaboradoresService(TestCase):
             descripcion="Pago por servicios"
         )
         self.assertIsInstance(pago, PagoColaborador)
-        self.assertEqual(pago.monto, 1000.00)  # Asegúrate de que el campo correcto sea `monto_pagado`
+        self.assertEqual(pago.monto, 1000.00) 
 
     def test_actualizar_pago_exitoso(self):
         pago = PagosColaboradoresService.registrar_pago(
@@ -48,15 +48,14 @@ class TestPagosColaboradoresService(TestCase):
             monto=1500.00,
             descripcion="Pago actualizado"
         )
-        self.assertEqual(actualizado.monto, 1500.00)  # Asegúrate de que el campo correcto sea `monto_pagado`
+        self.assertEqual(actualizado.monto, 1500.00)  
 
     def test_obtener_historial_pagos(self):
         PagosColaboradoresService.registrar_pago(self.colaborador.id, 1000.00, date.today(), "Pago 1")
         pagos = PagosColaboradoresService.obtener_historial_pagos(self.colaborador.id)
         self.assertEqual(len(pagos), 1)
-        self.assertEqual(pagos[0].descripcion, "Pago 1")  # Verifica que el pago tenga la descripción correcta
+        self.assertEqual(pagos[0].descripcion, "Pago 1")  
 
     def tearDown(self):
-        # Limpia los objetos creados si es necesario
         self.colaborador.delete()
         self.usuario.delete()
