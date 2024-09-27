@@ -1,9 +1,15 @@
 from .models import PagoColaborador
 
+
 class PagosColaboradoresService:
     @staticmethod
     def registrar_pago(colaborador_id, monto, fecha_pago, descripcion):
-        pago = PagoColaborador(colaborador_id=colaborador_id, monto=monto, fecha_pago=fecha_pago, descripcion=descripcion)
+        pago = PagoColaborador(
+            colaborador_id=colaborador_id,
+            monto=monto,
+            fecha_pago=fecha_pago,
+            descripcion=descripcion,
+        )
         pago.save()
         return pago
 
@@ -24,4 +30,6 @@ class PagosColaboradoresService:
 
     @staticmethod
     def obtener_historial_pagos(colaborador_id):
-        return PagoColaborador.objects.filter(colaborador_id=colaborador_id).order_by('-fecha_pago')
+        return PagoColaborador.objects.filter(colaborador_id=colaborador_id).order_by(
+            "-fecha_pago"
+        )

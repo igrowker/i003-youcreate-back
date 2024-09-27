@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from .services import ObligacionesFiscalesService
 from .repositories import ObligacionesFiscalesRepository
 
+
 class ObligacionesFiscalesController(APIView):
     permission_classes = [IsAuthenticated]  # Asegura que el usuario esté autenticado
 
@@ -21,4 +22,7 @@ class ObligacionesFiscalesController(APIView):
         usuario_id = request.user.id  # Obtener el ID del usuario autenticado
         servicio = ObligacionesFiscalesService(usuario_id)
         servicio.manejar_obligaciones()
-        return Response({"mensaje": "Obligaciones fiscales calculadas y almacenadas."}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"mensaje": "Obligaciones fiscales calculadas y almacenadas."},
+            status=status.HTTP_201_CREATED,
+        )

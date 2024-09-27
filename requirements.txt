@@ -8,3 +8,6 @@ pycparser==2.22
 python-dotenv==1.0.1
 sqlparse==0.5.1
 tzdata==2024.1
+
+django-allauth==0.61.1
+dj-rest-auth==6.0.0

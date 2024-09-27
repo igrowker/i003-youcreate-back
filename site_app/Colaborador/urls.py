@@ -3,8 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import ColaboradorViewSet
 
 router = DefaultRouter()
-router.register(r'colaboradores', ColaboradorViewSet)
+router.register(r"colaboradores", ColaboradorViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

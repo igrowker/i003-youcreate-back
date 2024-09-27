@@ -1,11 +1,14 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 from datetime import timedelta
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_URL_DEV = "http://localhost:8000/"
+BASE_URL_PRODUCTION = ""
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
@@ -14,10 +17,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SITE_ID = 1  # Necessary for allauth
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    # TODO: Add production origins with https?
 ]
 
 INSTALLED_APPS = [
@@ -27,27 +33,41 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "Usuario.apps.UsuarioConfig",
+    "django.contrib.sites",
+    "Usuario",
+    # "Usuario.apps.UsuarioConfig",
     "Colaborador",
     "Ingreso",
     "PagoColaborador",
     "ObligacionFiscal",
     "corsheaders",
     "rest_framework",
+    "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.apple",
+    "dj_rest_auth",
+'dj_rest_auth.registration',
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+    ],
 }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=5
+        # TODO: Change back to 5 minutes for production
+        minutes=9999999
     ),  # Sets the expiration time of the access token
     "REFRESH_TOKEN_LIFETIME": timedelta(
         minutes=15
@@ -67,16 +87,32 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "Usuario.serializers.CustomTokenObtainPairSerializer",
 }
 
+REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE": "access",
+    "JWT_AUTH_REFRESH_COOKIE": "refresh",
+    "JWT_AUTH_REFRESH_COOKIE_PATH": "/api/token/refresh/",
+    "JWT_AUTH_HTTPONLY": False,  # Makes sure refresh token is sent
+    "JWT_TOKEN_CLAIMS_SERIALIZER": "Usuario.serializers.CustomTokenObtainPairSerializer",
+    "JWT_AUTH_RETURN_EXPIRATION": True,
+    "REGISTER_SERIALIZER": "Usuario.serializers.CustomRegisterSerializer",
+    "LOGIN_SERIALIZER": "Usuario.serializers.CustomLoginSerializer",
+    "LOGOUT_ON_PASSWORD_CHANGE": True,
+    # TODO: Test URL
+    "LOGOUT_REDIRECT_URL": "auth/login/",
+}
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # Added CORS headers Middleware
-    "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS headers Middleware
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # "Usuario.middleware.UserValidationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # Django AllAuth Middleware
 ]
 
 ROOT_URLCONF = "proyecto.urls"
@@ -84,7 +120,8 @@ ROOT_URLCONF = "proyecto.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        # TODO: Erase DIR path if not used
+        "DIRS": [BASE_DIR / "Templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -108,7 +145,13 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "Usuario.CustomUser"
-
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # No need to sent POST request to confirmation link
+LOGIN_URL = "/auth/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -155,3 +198,46 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTHENTICATION_BACKENDS = [
+    # `allauth` specific authentication methods, such as login by email
+    "allauth.account.auth_backends.AuthenticationBackend",
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_USE_TLS = True
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
+# TODO: Change URL for production
+# <EMAIL_CONFIRM_REDIRECT_BASE_URL>/<key>
+EMAIL_CONFIRM_REDIRECT_BASE_URL = "http://localhost:8000/email/confirm/"
+
+# <PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL>/<uidb64>/<token>/
+PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = "http://localhost:8000/password-reset/confirm/"
+
+# Social auth
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "key": "",  # leave empty, Google doesn't need a key for social auth
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "VERIFIED_EMAIL": True,
+    },
+}

@@ -3,13 +3,13 @@ from datetime import date, timedelta
 from .repositories import ObligacionesFiscalesRepository
 from Ingreso.models import Ingreso
 
-class ObligacionesFiscalesService:
 
+class ObligacionesFiscalesService:
     def __init__(self, usuario):
         self.usuario = usuario
         self.pais = usuario.pais_residencia
         self.repositorio = ObligacionesFiscalesRepository(usuario)
-    
+
     def manejar_obligaciones(self):
         """Maneja las obligaciones según el país del usuario"""
         if self.pais == "Argentina":
@@ -22,9 +22,9 @@ class ObligacionesFiscalesService:
         vencimiento_monotributo = self.calcular_vencimiento_monotributo()
 
         self.repositorio.guardar_obligacion(
-            tipo_impuesto='Monotributo',
+            tipo_impuesto="Monotributo",
             monto_a_pagar=cuota_monotributo,
-            fecha_vencimiento=vencimiento_monotributo
+            fecha_vencimiento=vencimiento_monotributo,
         )
 
     def calcular_retencion_ganancias(self):
@@ -32,19 +32,27 @@ class ObligacionesFiscalesService:
         retencion_ganancias = self.calcular_retencion_ganancias(ingresos_mensuales)
 
         self.repositorio.guardar_obligacion(
-            tipo_impuesto='Impuesto a las Ganancias',
+            tipo_impuesto="Impuesto a las Ganancias",
             monto_a_pagar=retencion_ganancias,
-            fecha_vencimiento=date.today().replace(day=30)  # Vencimiento al final del mes
+            fecha_vencimiento=date.today().replace(
+                day=30
+            ),  # Vencimiento al final del mes
         )
 
     # Métodos auxiliares: obtener ingresos, calcular vencimientos y cuotas
     def obtener_ingresos_anuales(self):
-        ingresos = Ingreso.objects.filter(usuario_id=self.usuario, fecha__year=date.today().year)
+        ingresos = Ingreso.objects.filter(
+            usuario_id=self.usuario, fecha__year=date.today().year
+        )
         return sum(ingreso.monto for ingreso in ingresos)
 
     def obtener_ingresos_mensuales(self):
         mes_actual = date.today().month
-        ingresos = Ingreso.objects.filter(usuario_id=self.usuario, fecha__year=date.today().year, fecha__month=mes_actual)
+        ingresos = Ingreso.objects.filter(
+            usuario_id=self.usuario,
+            fecha__year=date.today().year,
+            fecha__month=mes_actual,
+        )
         return sum(ingreso.monto for ingreso in ingresos)
 
     def calcular_vencimiento_monotributo(self):
