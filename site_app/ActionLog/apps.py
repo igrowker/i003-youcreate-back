@@ -2,4 +2,7 @@ from django.apps import AppConfig
 
 class ActionLogConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'ActionLog' 
+    name = 'ActionLog'
+
+    def ready(self):
+        import ActionLog.signals 

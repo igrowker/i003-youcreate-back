@@ -37,8 +37,7 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
             return Response({"detail": str(e)}, status=400)
 
     def list(self, request, *args, **kwargs):
-        # Obtiene todos los pagos, sin filtrar por colaborador_id
-        pagos = self.get_queryset()  # Esto obtiene todos los pagos
+        pagos = self.get_queryset()  
 
         page = self.paginate_queryset(pagos)
         if page is not None:

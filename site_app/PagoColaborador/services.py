@@ -1,5 +1,5 @@
 from .models import PagoColaborador
-from Colaborador.models import Colaborador  # Asegúrate de importar el modelo Colaborador
+from Colaborador.models import Colaborador
 
 class PagosColaboradoresService:
     
