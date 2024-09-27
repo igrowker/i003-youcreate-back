@@ -3,6 +3,7 @@ from django.urls import path
 from .controllers import ObligacionesFiscalesController
 
 urlpatterns = [
-    # Ruta para obtener las obligaciones fiscales
-    path('', ObligacionesFiscalesController.as_view(), name='obligaciones_fiscales'),  # Cambiado a vacío para coincidir con la ruta completa
+    path('obligaciones-fiscales/', ObligacionesFiscalesController.as_view(), name='obligaciones_fiscales'),
+    path('obligaciones-fiscales/<int:id>/', ObligacionesFiscalesController.as_view(), name='obligacion-fiscal-detail'),
 ]
+

@@ -8,6 +8,7 @@ from .repositories import ObligacionesFiscalesRepository
 from .models import ObligacionFiscal
 from .serializers import ObligacionFiscalSerializer
 from Usuario.models import CustomUser
+from django.shortcuts import get_object_or_404
 
 class ObligacionesFiscalesController(APIView):
     permission_classes = [IsAuthenticated]
@@ -15,7 +16,6 @@ class ObligacionesFiscalesController(APIView):
     def get(self, request):
         """Obtiene las obligaciones fiscales calculadas y almacenadas del usuario autenticado"""
         usuario = request.user
-        print(f"Usuario autenticado: {usuario.nombre}")
         
         # Cálculo de las obligaciones fiscales
         servicio = ObligacionesFiscalesService(usuario)
@@ -28,3 +28,14 @@ class ObligacionesFiscalesController(APIView):
         # Serialización de los resultados
         serializer = ObligacionFiscalSerializer(obligaciones, many=True)
         return Response({"obligaciones": serializer.data}, status=status.HTTP_200_OK)
+
+    def put(self, request, id):
+        try:
+            obligacion = ObligacionFiscal.objects.get(id=id)
+            serializer = ObligacionFiscalSerializer(obligacion, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ObligacionFiscal.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
