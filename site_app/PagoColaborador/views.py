@@ -1,4 +1,3 @@
-
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -52,3 +51,4 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
         # Si no se usa paginación, devolver todos los resultados
         serializer = self.get_serializer(pagos, many=True)
         return Response(serializer.data)
+

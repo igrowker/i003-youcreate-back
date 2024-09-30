@@ -1,5 +1,4 @@
 from django.db import models
-
 from Usuario.models import CustomUser # Importamos el modelo de usuarios de Django
 
 
