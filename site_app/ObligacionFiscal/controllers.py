@@ -25,7 +25,6 @@ class ObligacionesFiscalesController(APIView):
         # Obtener las obligaciones ya guardadas
         repo = ObligacionesFiscalesRepository(usuario)
         obligaciones = repo.obtener_obligaciones_fiscales()
-
         enviar_notificacion_vencimiento() 
 
         # Serialización de los resultados
