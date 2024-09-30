@@ -5,8 +5,8 @@ from .models import ObligacionFiscal
 from .serializers import ObligacionFiscalSerializer
 
 class ObligacionesFiscalesController(APIView):
-    permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
-    #permission_classes = [AllowAny]
+    #permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
+    permission_classes = [AllowAny] # Permitir acceso sin autenticación temporalmente
 
     def get(self, request):
         usuario = request.user  # Obtenemos el usuario autenticado
