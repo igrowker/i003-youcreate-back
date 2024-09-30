@@ -50,8 +50,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.apple",
-    "dj_rest_auth",
-'dj_rest_auth.registration',
+    # "dj_rest_auth",
+    "dj_rest_auth.registration",
 ]
 
 REST_FRAMEWORK = {
@@ -91,7 +91,7 @@ REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "access",
     "JWT_AUTH_REFRESH_COOKIE": "refresh",
-    "JWT_AUTH_REFRESH_COOKIE_PATH": "/api/token/refresh/",
+    "JWT_AUTH_REFRESH_COOKIE_PATH": "auth/token/refresh/",
     "JWT_AUTH_HTTPONLY": False,  # Makes sure refresh token is sent
     "JWT_TOKEN_CLAIMS_SERIALIZER": "Usuario.serializers.CustomTokenObtainPairSerializer",
     "JWT_AUTH_RETURN_EXPIRATION": True,
@@ -120,7 +120,6 @@ ROOT_URLCONF = "proyecto.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # TODO: Erase DIR path if not used
         "DIRS": [BASE_DIR / "Templates"],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -145,13 +144,19 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "Usuario.CustomUser"
+
+# Django AllAuth settings
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
-ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # No need to sent POST request to confirmation link
-LOGIN_URL = "/auth/login/"
+
+LOGIN_URL = "auth/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -206,6 +211,8 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
+
+# Django SMTP settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_USE_TLS = True
@@ -213,15 +220,14 @@ EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-
-# TODO: Change URL for production
-# <EMAIL_CONFIRM_REDIRECT_BASE_URL>/<key>
-EMAIL_CONFIRM_REDIRECT_BASE_URL = "http://localhost:8000/email/confirm/"
-
 # <PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL>/<uidb64>/<token>/
-PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = "http://localhost:8000/password-reset/confirm/"
+PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = (
+    "http://localhost:8000/password-reset/confirm/"
+)
+
+ACCOUNT_EMAIL_VERIFICATION_SENT_REDIRECT_URL = (
+    "auth/registration/email-verification/sent/"
+)
 
 # Social auth
 SOCIALACCOUNT_PROVIDERS = {

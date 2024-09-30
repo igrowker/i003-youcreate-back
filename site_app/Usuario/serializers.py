@@ -4,7 +4,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueValidator
 from django.utils.translation import gettext_lazy as _
-from django.urls import exceptions as url_exceptions
 
 from proyecto import settings
 
@@ -16,8 +15,11 @@ class CustomRegisterSerializer(RegisterSerializer):
     """Serializer para registrar un usuario"""
 
     username = None
+    first_name = None
+    last_name = None
+
     email = serializers.EmailField(
-        required=True, validators=[UniqueValidator(queryset=CustomUser.objects.all())]
+        required=settings.ACCOUNT_EMAIL_REQUIRED, validators=[UniqueValidator(queryset=CustomUser.objects.all())]
     )
     password1 = serializers.CharField(
         write_only=True,
@@ -30,7 +32,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     pais_residencia = serializers.CharField(required=True)
     redes_sociales = serializers.JSONField(required=False, allow_null=True)
     telefono = serializers.CharField(required=False, allow_blank=True)
-    numero_fiscal = serializers.CharField(required=True)
+    numero_fiscal = serializers.CharField(required=False, allow_blank=True)
 
     def get_cleaned_data(self):
         return {
@@ -45,6 +47,31 @@ class CustomRegisterSerializer(RegisterSerializer):
             "numero_fiscal": self.validated_data.get("numero_fiscal", ""),
         }
 
+    def validate(self, attrs):
+        if attrs["password1"] != attrs["password2"]:
+            raise serializers.ValidationError(
+                {"password": "Los campos de contraseña no coinciden"}
+            )
+        # TODO:Add custom validation for "numero_fiscal" based on country
+
+        return attrs
+
+    def custom_signup(self, request, user):
+        user.nombre = self.validated_data.get("nombre")
+        user.apellido = self.validated_data.get("apellido")
+        user.email = self.validated_data.get("email")
+        user.password = self.validated_data.get("password1")
+        user.pais_residencia = self.validated_data.get("pais_residencia")
+        user.redes_sociales = self.validated_data.get("redes_sociales")
+        user.telefono = self.validated_data.get("telefono")
+        user.numero_fiscal = self.validated_data.get("numero_fiscal")
+        # TODO: Hash user sensitive data --> numero_fiscal, redes_sociales, telefonos?
+
+
+        user.set_password(self.validated_data["password1"])
+        user.save()
+        return user
+
     class Meta:
         model = CustomUser
         fields = (
@@ -56,44 +83,17 @@ class CustomRegisterSerializer(RegisterSerializer):
             "telefono",
             "pais_residencia",
             "redes_sociales",
+            "numero_fiscal",
         )
         extra_kwargs = {
             "nombre": {"required": True},
             "apellido": {"required": True},
             "email": {"required": True},
             "pais_residencia": {"required": True},
-            "redes_sociales": {"required": True},
+            "redes_sociales": {"required": False},
             "telefono": {"required": False, "allow_blank": True},
+            "numero_fiscal": {"required": False, "allow_blank": True},
         }
-
-    def validate(self, attrs):
-        if attrs["password1"] != attrs["password2"]:
-            raise serializers.ValidationError(
-                {"password": "Los campos de contraseña no coinciden"}
-            )
-
-        return attrs
-
-    def create(self, validated_data):
-        if not validated_data:
-            raise ValueError("Validated data is empty")
-
-        usuario = CustomUser.objects.create(
-            nombre=validated_data.get("nombre"),
-            apellido=validated_data.get("apellido"),
-            email=validated_data.get("email"),
-            password=validated_data.get("password1"),
-            pais_residencia=validated_data.get("pais_residencia"),
-            redes_sociales=validated_data.get("redes_sociales", {}),
-            telefono=validated_data.get("telefono"),
-            numero_fiscal=validated_data.get("numero_fiscal"),
-        )
-
-        usuario.set_password(validated_data["password1"])
-        usuario.save()
-
-        return usuario
-
 
 class CustomLoginSerializer(LoginSerializer):
     username = None
@@ -104,12 +104,18 @@ class CustomLoginSerializer(LoginSerializer):
         from allauth.account import app_settings as allauth_account_settings
 
         # Authentication through email
-        if allauth_account_settings.AUTHENTICATION_METHOD == allauth_account_settings.AuthenticationMethod.EMAIL:
-            print('Inside get_auth_user_using_allauth')
+        if (
+            allauth_account_settings.AUTHENTICATION_METHOD
+            == allauth_account_settings.AuthenticationMethod.EMAIL
+        ):
+            print("Inside get_auth_user_using_allauth")
             return self._validate_email(email, password)
 
         # Authentication through username
-        if allauth_account_settings.AUTHENTICATION_METHOD == allauth_account_settings.AuthenticationMethod.USERNAME:
+        if (
+            allauth_account_settings.AUTHENTICATION_METHOD
+            == allauth_account_settings.AuthenticationMethod.USERNAME
+        ):
             return self._validate_username(username, password)
 
         # Authentication through either username or email
@@ -122,7 +128,6 @@ class CustomLoginSerializer(LoginSerializer):
         user = self.get_auth_user(username, email, password)
 
         if not user:
-            print('Inside not user')
             msg = _("Unable to log in with provided credentials.")
             raise exceptions.ValidationError(msg)
 

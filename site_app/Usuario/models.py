@@ -17,7 +17,7 @@ class CustomUser(AbstractUser):
     telefono = models.CharField(max_length=255, null=True, blank=True)
     password = models.CharField(max_length=255)
     pais_residencia = models.CharField(max_length=255)
-    redes_sociales = models.JSONField(null=True, blank=True)
+    redes_sociales = models.JSONField(null=True)
     numero_fiscal = models.CharField(max_length=25)
     monotributo = models.BooleanField(default=False)
 

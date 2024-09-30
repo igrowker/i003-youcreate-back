@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Usuario', '0011_rename_verificado_customuser_verified'),
+        ("Usuario", "0011_rename_verificado_customuser_verified"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='customuser',
-            name='redes_sociales',
+            model_name="customuser",
+            name="redes_sociales",
             field=models.JSONField(blank=True, null=True),
         ),
     ]
