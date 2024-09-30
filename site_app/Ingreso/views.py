@@ -69,5 +69,3 @@ class IngresosPorAnioView(APIView):
         serializer = IngresoPorAnioSerializer(ingresos_por_anio, many=True)
         #Retorno los datos serializados en formato JSON  
         return Response(serializer.data)    
-    
-

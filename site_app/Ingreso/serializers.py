@@ -16,3 +16,4 @@ class IngresoPorAnioSerializer(serializers.Serializer):
     anio = serializers.IntegerField() # Año en el que se agruparán los ingresos
     total = serializers.DecimalField(max_digits=10, decimal_places=2) 
 
+

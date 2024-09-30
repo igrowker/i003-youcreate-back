@@ -1,10 +1,8 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ObligacionFiscalViewSet
-
-router = DefaultRouter()
-router.register(r"obligaciones-fiscales", ObligacionFiscalViewSet)
+from django.urls import path
+from .controllers import ObligacionesFiscalesController
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path('obligaciones-fiscales/', ObligacionesFiscalesController.as_view(), name='obligaciones_fiscales'),
+    path('obligaciones-fiscales/<int:id>/', ObligacionesFiscalesController.as_view(), name='obligacion-fiscal-detail'),
 ]
+
