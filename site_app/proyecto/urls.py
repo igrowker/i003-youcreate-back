@@ -8,5 +8,6 @@ urlpatterns = [
     path('api/', include('PagoColaborador.urls')),
     path('api/', include('Colaborador.urls')),
     path('api/', include('ObligacionFiscal.urls')),  # Incluye las URLs de ObligacionFiscal
+    path('api/', include('ActionLog.urls')),
     path("api/", include("Ingreso.url")),
 ]

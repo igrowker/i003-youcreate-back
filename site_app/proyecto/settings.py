@@ -1,4 +1,4 @@
-
+from datetime import timedelta
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "Ingreso",
     "PagoColaborador",
     "ObligacionFiscal",
+    'ActionLog',
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
@@ -50,7 +51,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=10000000
+        minutes=99999
     ),  # Sets the expiration time of the access token
     "REFRESH_TOKEN_LIFETIME": timedelta(
         minutes=15
@@ -160,7 +161,6 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_USE_TLS = True

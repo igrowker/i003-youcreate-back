@@ -6,3 +6,5 @@ class PagoColaboradorSerializer(serializers.ModelSerializer):
         model = PagoColaborador
         fields = '__all__'
 
+    def create(self, validated_data):
+        return PagoColaborador.objects.create(**validated_data)
