@@ -1,4 +1,3 @@
-# ObligacionFiscal/controllers.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,6 +8,8 @@ from .models import ObligacionFiscal
 from .serializers import ObligacionFiscalSerializer
 from Usuario.models import CustomUser
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .tasks import enviar_notificacion_vencimiento 
 
 class ObligacionesFiscalesController(APIView):
     permission_classes = [IsAuthenticated]
@@ -24,6 +25,8 @@ class ObligacionesFiscalesController(APIView):
         # Obtener las obligaciones ya guardadas
         repo = ObligacionesFiscalesRepository(usuario)
         obligaciones = repo.obtener_obligaciones_fiscales()
+
+        enviar_notificacion_vencimiento() 
 
         # Serialización de los resultados
         serializer = ObligacionFiscalSerializer(obligaciones, many=True)
