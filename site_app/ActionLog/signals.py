@@ -9,7 +9,6 @@ User = get_user_model()
 @receiver(pre_save, sender=User)
 def cache_old_user_state(sender, instance, **kwargs):
     if instance.pk:
-        # Guarda el estado antiguo del usuario en la cache antes de guardarlo
         old_instance = sender.objects.get(pk=instance.pk)
         cache.set(f'user_{instance.pk}_old_state', old_instance)
 
