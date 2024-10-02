@@ -1,4 +1,3 @@
-from datetime import timedelta
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -7,6 +6,8 @@ from celery.schedules import crontab
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_URL_DEV = "http://localhost:8000/"
+BASE_URL_PRODUCTION = ""
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
@@ -15,12 +16,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SITE_ID = 1  # Necessary for allauth
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
-
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -29,29 +31,44 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "Usuario.apps.UsuarioConfig",
+    "django.contrib.sites",
+    "Usuario",
     "Colaborador",
     "Ingreso",
     "PagoColaborador",
     "ObligacionFiscal",
     'ActionLog',
     "corsheaders",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.mfa",
+    'allauth.headless',
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.apple",
+    "dj_rest_auth.registration",
     "rest_framework",
+    "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     'django_celery_beat',
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+    ],
 }
 
+# Simple JWT config
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=99999
+        # TODO: Change back to 5 minutes for production
+        minutes=9999999
     ),  # Sets the expiration time of the access token
     "REFRESH_TOKEN_LIFETIME": timedelta(
         minutes=15
@@ -71,16 +88,31 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "Usuario.serializers.CustomTokenObtainPairSerializer",
 }
 
+# Django Rest Auth config
+REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE": "access",
+    "JWT_AUTH_REFRESH_COOKIE": "refresh",
+    "JWT_AUTH_REFRESH_COOKIE_PATH": "auth/token/refresh/",
+    "JWT_AUTH_HTTPONLY": False,  # Makes sure refresh token is sent
+    "JWT_TOKEN_CLAIMS_SERIALIZER": "Usuario.serializers.CustomTokenObtainPairSerializer",
+    "JWT_AUTH_RETURN_EXPIRATION": True,
+    "REGISTER_SERIALIZER": "Usuario.serializers.CustomRegisterSerializer",
+    "LOGIN_SERIALIZER": "Usuario.serializers.CustomLoginSerializer",
+    "LOGOUT_ON_PASSWORD_CHANGE": True,
+    "LOGOUT_REDIRECT_URL": "auth/login/",
+}
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # Added CORS headers Middleware
-    "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS headers Middleware
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # Django AllAuth Middleware
 ]
 
 ROOT_URLCONF = "proyecto.urls"
@@ -88,7 +120,7 @@ ROOT_URLCONF = "proyecto.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "Templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -112,13 +144,43 @@ DATABASES = {
 
 AUTH_USER_MODEL = "Usuario.CustomUser"
 
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+# Django AllAuth settings
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # No need to sent POST request to confirmation link
+
+HEADLESS_ONLY = True
+# HEADLESS_FRONTEND_URLS = {
+#     "account_confirm_email": "/account/verify-email/{key}",
+#     "account_reset_password": "/account/password/reset",
+#     "account_reset_password_from_key": "/account/password/reset/key/{key}",
+#     "account_signup": "/account/signup",
+#     "socialaccount_login_error": "/account/provider/callback",
+# }
+
+# Activa la autenticación multifactor con TOTP
+MFA_SUPPORTED_TYPES = ["totp"]
+MFA_TOTP_PERIOD = 60  # 1 minuto de duración para el código TOTP
+MFA_ADAPTER = "allauth.mfa.adapter.DefaultMFAAdapter"
+MFA_TOTP_ISSUER = "YouCreate"
+# MFA default forms, se pueden cambiar los formularios usados en la autenticación multifactor
+MFA_FORMS = {
+    'authenticate': 'allauth.mfa.base.forms.AuthenticateForm',
+    'reauthenticate': 'allauth.mfa.base.forms.AuthenticateForm',
+    'activate_totp': 'allauth.mfa.totp.forms.ActivateTOTPForm',
+    'deactivate_totp': 'allauth.mfa.totp.forms.DeactivateTOTPForm',
+    'generate_recovery_codes': 'allauth.mfa.recovery_codes.forms.GenerateRecoveryCodesForm',
+}
+
+LOGIN_URL = "auth/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "Usuario.auth_backend.CustomPasswordValidator",
-    },
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
@@ -131,6 +193,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+    {
+        "NAME": "Usuario.auth_backend.CustomPasswordValidator",
+    },
 ]
 
 PASSWORD_HASHERS = [
@@ -141,9 +206,6 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
 
-
-
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
@@ -152,18 +214,50 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = "static/"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTHENTICATION_BACKENDS = [
+    # `allauth` specific authentication methods, such as login by email
+    "allauth.account.auth_backends.AuthenticationBackend",
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+
+# Django SMTP settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_USE_TLS = True
 EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+# <PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL>/<uidb64>/<token>/
+PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = (
+    "http://localhost:8000/password-reset/confirm/"
+)
+
+ACCOUNT_EMAIL_VERIFICATION_SENT_REDIRECT_URL = (
+    "auth/registration/email-verification/sent/"
+)
+
+# Social auth
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "key": "",  # leave empty, Google doesn't need a key for social auth
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "VERIFIED_EMAIL": True,
+    },
+}

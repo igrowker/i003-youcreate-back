@@ -1,13 +1,23 @@
-from django.contrib import admin
-from django.urls import path
-from . import views
-from .views import CustomTokenObtainPairView
-from rest_framework_simplejwt.views import (
-    TokenRefreshView,
-)
+from allauth.socialaccount.views import signup
+from dj_rest_auth.views import PasswordResetView, PasswordResetConfirmView
+from django.urls import path, include
+from django.views.generic import TemplateView
+
+from .views import GoogleLogin
 
 urlpatterns = [
-    path("login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("login/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("register/", views.RegisterView.as_view(), name="register"),
+    # TODO: Add user editing url
+    path("signup/", signup, name="account_signup"),
+    path("google/", GoogleLogin.as_view(), name="google_login"),
+    path("password/reset/", PasswordResetView.as_view(), name="rest_password_reset"),
+    path(
+        "password/reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="rest_password_reset_confirm",
+    ),
+    path(
+        "password-reset/confirm/<uidb64>/<token>/",
+        TemplateView.as_view(),
+        name="password_reset_confirm",
+    ),
 ]
