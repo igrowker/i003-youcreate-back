@@ -5,4 +5,3 @@ class ColaboradorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Colaborador
         fields = '__all__'
-

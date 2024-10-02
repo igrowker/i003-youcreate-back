@@ -1,8 +1,6 @@
-import re
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
+import re
 
 # TODO: Test password validator
 class CustomPasswordValidator(serializers.ModelSerializer):
