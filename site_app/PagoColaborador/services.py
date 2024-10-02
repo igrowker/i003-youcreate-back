@@ -1,14 +1,20 @@
 from .models import PagoColaborador
-
+from Colaborador.models import Colaborador
 
 class PagosColaboradoresService:
+    
     @staticmethod
     def registrar_pago(colaborador_id, monto, fecha_pago, descripcion):
+        try:
+            colaborador = Colaborador.objects.get(id=colaborador_id)
+        except Colaborador.DoesNotExist:
+            raise ValueError("El colaborador no existe")
+
         pago = PagoColaborador(
-            colaborador_id=colaborador_id,
+            colaborador_id=colaborador,  
             monto=monto,
             fecha_pago=fecha_pago,
-            descripcion=descripcion,
+            descripcion=descripcion
         )
         pago.save()
         return pago
@@ -30,6 +36,4 @@ class PagosColaboradoresService:
 
     @staticmethod
     def obtener_historial_pagos(colaborador_id):
-        return PagoColaborador.objects.filter(colaborador_id=colaborador_id).order_by(
-            "-fecha_pago"
-        )
+        return PagoColaborador.objects.filter(colaborador_id=colaborador_id).order_by('-fecha_pago')

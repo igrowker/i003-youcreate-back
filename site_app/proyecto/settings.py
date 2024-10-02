@@ -1,9 +1,8 @@
 import os
 from pathlib import Path
-
 from dotenv import load_dotenv
 from datetime import timedelta
-
+from celery.schedules import crontab
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +22,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    # TODO: Add production origins with https?
 ]
 
 INSTALLED_APPS = [
@@ -39,6 +37,7 @@ INSTALLED_APPS = [
     "Ingreso",
     "PagoColaborador",
     "ObligacionFiscal",
+    'ActionLog',
     "corsheaders",
     "allauth",
     "allauth.account",
@@ -52,6 +51,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    'django_celery_beat',
 ]
 
 REST_FRAMEWORK = {
@@ -134,7 +134,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "proyecto.wsgi.application"
-
 
 DATABASES = {
     "default": {
