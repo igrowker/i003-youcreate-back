@@ -11,5 +11,11 @@
 # Create a superuser
     python manage.py createsuperuser
 # Run the server
+    python manage.py runserver
 
-    python3 site_app/manage.py runserver
+# Check dependencies
+    pip freeze
+# Create requirements.txt
+    pip freeze > requirements.txt
+# Install dependencies
+    pip install -r requirements.txt

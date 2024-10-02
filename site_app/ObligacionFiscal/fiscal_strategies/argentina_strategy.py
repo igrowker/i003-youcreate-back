@@ -1,165 +1,215 @@
-from .strategy import ObligacionesFiscalesStrategy  # Importa la estrategia base para obligaciones fiscales
-from ..repositories import ObligacionesFiscalesRepository  # Importa el repositorio de obligaciones fiscales
-from decimal import Decimal, ROUND_HALF_UP  # Importa Decimal para manejar cálculos monetarios
-from datetime import date, timedelta  # Importa funciones para trabajar con fechas
-import calendar  # Importa el módulo para trabajar con calendarios
-from Ingreso.models import Ingreso  # Importa el modelo de ingresos
+from .strategy import ObligacionesFiscalesStrategy  # Importa una clase base que establece cómo se deben calcular las obligaciones fiscales.
+from ..repositories import ObligacionesFiscalesRepository  # Importa algo que maneja cómo guardar información de las obligaciones fiscales.
+from decimal import Decimal, ROUND_HALF_UP  # Importa herramientas para manejar números con decimales y redondearlos correctamente.
+from datetime import date, timedelta  # Importa funciones para manejar fechas y periodos de tiempo.
+import calendar  # Importa una herramienta que trabaja con los calendarios.
+from Ingreso.models import Ingreso  # Importa el modelo de ingresos del usuario.
+
 
 class ArgentinaFiscalStrategy(ObligacionesFiscalesStrategy):
     """Estrategia para las obligaciones fiscales en Argentina."""
 
     def __init__(self, usuario):
-        # Inicializa la estrategia con un usuario y un repositorio asociado
+        # Inicializa la estrategia con un usuario y crea un repositorio para manejar las obligaciones fiscales de ese usuario
         self.usuario = usuario
-        self.repositorio = ObligacionesFiscalesRepository(usuario)  # Crea un repositorio para el usuario
+        self.repositorio = ObligacionesFiscalesRepository(usuario)  # Asocia un repositorio para el manejo de obligaciones fiscales del usuario
+
+    def calcular_obligaciones(self, monotributo=False):
+
+        """Calcula y guarda las obligaciones fiscales del usuario según si es monotributista o no."""
+        ingresos_mensuales = self.obtener_ingresos_mensuales()  # Calcula los ingresos mensuales promedio del usuario
+        meses_registrados = self.contar_meses_registrados()  # Cuenta cuántos meses del año se han registrado ingresos
+
         
+        # Verifica si el usuario es monotributista basado en el argumento monotributo o en el perfil del usuario
+        if monotributo is not None:
+            es_monotributista = monotributo
+        else:
+            es_monotributista = self.usuario.monotributo
 
-    def calcular_obligaciones(self):
-        """Calcula y guarda las obligaciones fiscales para Argentina."""
-        # Calculamos Monotributo
-        ingresos_anuales = self.estimar_ingresos_anuales()  # Estima los ingresos anuales
-        cuota_monotributo = self.calcular_cuota_monotributo(ingresos_anuales)  # Calcula la cuota
-        if cuota_monotributo:
-            vencimiento_monotributo = self.calcular_vencimiento_monotributo()  # Calcula la fecha de vencimiento
-            obligacion = self.repositorio.guardar_obligacion(
-                tipo_impuesto='Monotributo',  # Especifica el tipo de impuesto
-                monto_a_pagar=cuota_monotributo,  # Monto a pagar
-                fecha_vencimiento=vencimiento_monotributo  # Fecha de vencimiento
-            )
+        if es_monotributista:
+            # Si el usuario es monotributista y tiene meses registrados con ingresos, calcula sus obligaciones de monotributo
+            if meses_registrados > 0:
+                ingresos_anuales_estimados = (ingresos_mensuales / meses_registrados) * 12  # Estima los ingresos anuales a partir de los ingresos mensuales
+                cuota_monotributo = self.calcular_cuota_monotributo(ingresos_anuales_estimados)  # Calcula cuánto debe pagar de monotributo según sus ingresos anuales
+                if cuota_monotributo:
+                    vencimiento_monotributo = self.calcular_vencimiento_monotributo()
+                    # Verificar si la obligación ya existe
+                    if not self.repositorio.obtener_obligaciones_fiscales().filter(tipo_impuesto='Monotributo', fecha_vencimiento=vencimiento_monotributo).exists():
+                        self.repositorio.guardar_obligacion(
+                            tipo_impuesto='Monotributo',
+                            monto_a_pagar=cuota_monotributo,
+                            fecha_vencimiento=vencimiento_monotributo
+                        )
 
-        # Calculamos Impuesto a las Ganancias
-        ingresos_mensuales = self.obtener_ingresos_mensuales()  # Obtiene ingresos mensuales
-        ganancias = self.calcular_retencion_ganancias(ingresos_mensuales)  # Calcula retención de ganancias
-        if ganancias:
-            vencimiento_ganancias = self.calcular_vencimiento_ganancias()  # Calcula la fecha de vencimiento
-            obligacion_ganancias = self.repositorio.guardar_obligacion(
-                tipo_impuesto='Impuesto a las Ganancias',  # Especifica el tipo de impuesto
-                monto_a_pagar=ganancias,  # Monto a pagar
-                fecha_vencimiento=vencimiento_ganancias  # Fecha de vencimiento
-            )
 
-        # Calculamos el IVA
-        iva = self.calcular_iva(ingresos_mensuales)  # Calcula el IVA
-        if iva:
-            vencimiento_iva = self.calcular_vencimiento_iva()  # Calcula la fecha de vencimiento del IVA
-            obligacion_iva = self.repositorio.guardar_obligacion(
-                tipo_impuesto='IVA',  # Especifica el tipo de impuesto
-                monto_a_pagar=iva,  # Monto a pagar
-                fecha_vencimiento=vencimiento_iva  # Fecha de vencimiento
-            )
+            # También calcula y guarda el impuesto a las ganancias si aplica
+            ganancias = self.calcular_retencion_ganancias(ingresos_mensuales)  # Calcula la retención de ganancias
+            if ganancias:
+                vencimiento_ganancias = self.calcular_vencimiento_ganancias()  # Calcula la fecha de vencimiento para el pago de ganancias
+                if not self.repositorio.obtener_obligaciones_fiscales().filter(tipo_impuesto='Impuesto a las Ganancias', fecha_vencimiento=vencimiento_ganancias).exists():
+                    self.repositorio.guardar_obligacion(
+                        tipo_impuesto='Impuesto a las Ganancias',
+                        monto_a_pagar=ganancias,
+                        fecha_vencimiento=vencimiento_ganancias
+                    )
+        else:
+            # Si el usuario no es monotributista, calcular IVA y Ganancias
+            if meses_registrados > 0:
+                iva = self.calcular_iva(ingresos_mensuales)  # Calcula el IVA sobre los ingresos mensuales
+                if iva:
+                    vencimiento_iva = self.calcular_vencimiento_iva()  # Calcula la fecha de vencimiento del IVA
+                    if not self.repositorio.obtener_obligaciones_fiscales().filter(tipo_impuesto='IVA', fecha_vencimiento=vencimiento_iva).exists():
+                        self.repositorio.guardar_obligacion(
+                            tipo_impuesto='IVA',
+                            monto_a_pagar=iva,
+                            fecha_vencimiento=vencimiento_iva
+                        )
+
+                #También calcula y guarda el impuesto a las ganancias
+                ganancias = self.calcular_retencion_ganancias(ingresos_mensuales)
+                if ganancias:
+                    vencimiento_ganancias = self.calcular_vencimiento_ganancias()
+                    if not self.repositorio.obtener_obligaciones_fiscales().filter(tipo_impuesto='Impuesto a las Ganancias', fecha_vencimiento=vencimiento_ganancias).exists():
+                        self.repositorio.guardar_obligacion(
+                            tipo_impuesto='Impuesto a las Ganancias',
+                            monto_a_pagar=ganancias,
+                            fecha_vencimiento=vencimiento_ganancias
+                        )
 
     # --- Métodos Auxiliares ---
-
-    def estimar_ingresos_anuales(self):
-        """Estima los ingresos anuales del usuario en base a los ingresos registrados."""
-        ingresos_mensuales = self.obtener_ingresos_mensuales()  # Obtiene los ingresos mensuales
-        mes_actual = date.today().month  # Obtiene el mes actual
-        
-        # Si el usuario lleva menos de un año registrado, estima los ingresos anuales
-        ingresos_totales = Ingreso.objects.filter(usuario_id=self.usuario, fecha__year=date.today().year)  # Filtra ingresos del año actual
-        meses_registrados = len(set(ingreso.fecha.month for ingreso in ingresos_totales))  # Cuenta los meses registrados
-        
-        if meses_registrados > 0:
-            ingresos_anuales_estimados = ingresos_mensuales * 12  # Estima ingresos anuales
-        else:
-            ingresos_anuales_estimados = 0  # Si no hay ingresos registrados, retorna 0
-
-        return ingresos_anuales_estimados  # Retorna la estimación
-
+    
     def obtener_ingresos_mensuales(self):
-        """Obtiene los ingresos mensuales del usuario."""
-        mes_actual = date.today().month  # Obtiene el mes actual
-        ingresos = Ingreso.objects.filter(usuario_id=self.usuario, fecha__year=date.today().year, fecha__month=mes_actual)  # Filtra ingresos del mes actual
-        return sum(ingreso.monto for ingreso in ingresos)  # Suma y retorna los ingresos
+        """Calcula los ingresos mensuales promedio del usuario, sumando los ingresos registrados en el año actual y dividiendo entre los meses con ingresos."""
+        ingresos_totales = Ingreso.objects.filter(usuario_id=self.usuario, fecha__year=date.today().year)  # Filtra los ingresos del año actual
+        if ingresos_totales.exists():  # Si hay ingresos registrados
+            total_ingresos = sum(ingreso.monto for ingreso in ingresos_totales)  # Suma todos los ingresos
+            meses_registrados = self.contar_meses_registrados()  # Cuenta los meses con ingresos
+            if meses_registrados > 0:
+                ingresos_mensuales_promedio = total_ingresos / meses_registrados  # Calcula el promedio mensual
+                return ingresos_mensuales_promedio
+        return 0  # Si no hay ingresos registrados, retorna 0
 
-    def calcular_cuota_monotributo(self, ingresos_anuales):
-        """Calcula la cuota de monotributo en base a los ingresos anuales."""
-        # Determina la cuota según los ingresos anuales
-        if ingresos_anuales <= Decimal('2108288.22'):
-            return Decimal('12128.39')
-        elif ingresos_anuales <= Decimal('3133941.71'):
-            return Decimal('13571.75')
-        elif ingresos_anuales <= Decimal('4387518.35'):
-            return Decimal('15241.42')
-        elif ingresos_anuales <= Decimal('5449094.70'):
-            return Decimal('19066.46')
-        elif ingresos_anuales <= Decimal('6416528.89'):
-            return Decimal('24526.43')
-        elif ingresos_anuales <= Decimal('8020661.11'):
-            return Decimal('29223.11')
-        elif ingresos_anuales <= Decimal('9624793.31'):
-            return Decimal('33439.61')
-        elif ingresos_anuales <= Decimal('11916410.77'):
-            return Decimal('56402.68')
-        elif ingresos_anuales <= Decimal('13337213.57'):
-            return Decimal('81121.96')
-        elif ingresos_anuales <= Decimal('15285088.45'):
-            return Decimal('93619.47')
+
+    def contar_meses_registrados(self):
+        """Cuenta cuántos meses del año actual tienen ingresos registrados."""
+        ingresos_totales = Ingreso.objects.filter(usuario_id=self.usuario, fecha__year=date.today().year)  # Filtra los ingresos del año actual
+        meses_registrados = len(set(ingreso.fecha.month for ingreso in ingresos_totales))  # Crea un conjunto con los meses y cuenta cuántos diferentes hay
+        return meses_registrados
+
+
+    def calcular_cuota_monotributo(self, ingresos_anuales_estimados):
+        """Calcula la cuota de monotributo en base a los ingresos anuales estimados."""
+        if ingresos_anuales_estimados <= Decimal('6450000'):
+            return Decimal('26000')  # Categoría A
+        elif ingresos_anuales_estimados <= Decimal('9450000'):
+            return Decimal('30280')  # Categoría B
+        elif ingresos_anuales_estimados <= Decimal('13250000'):
+            return Decimal('35458')  # Categoría C
+        elif ingresos_anuales_estimados <= Decimal('16450000'):
+            return Decimal('45443')  # Categoría D
+        elif ingresos_anuales_estimados <= Decimal('19350000'):
+            return Decimal('64348')  # Categoría E
+        elif ingresos_anuales_estimados <= Decimal('24250000'):
+            return Decimal('80983')  # Categoría F
+        elif ingresos_anuales_estimados <= Decimal('29000000'):
+            return Decimal('123696')  # Categoría G
+        elif ingresos_anuales_estimados <= Decimal('44000000'):
+            return Decimal('280734')  # Categoría H
+        elif ingresos_anuales_estimados <= Decimal('49250000'):
+            return Decimal('517608')  # Categoría I
+        elif ingresos_anuales_estimados <= Decimal('56400000'):
+            return Decimal('626931')  # Categoría J
+        elif ingresos_anuales_estimados <= Decimal('68000000'):
+            return Decimal('867931')  # Categoría K
         else:
-            return Decimal('106964.65')
+            # Si excede el límite superior de la última categoría, se devuelve el valor de la Categoría K
+            return Decimal('867931')  # Categoría K (última)
 
     def calcular_retencion_ganancias(self, ingresos_mensuales):
         """Calcula la retención de impuesto a las ganancias basado en los ingresos mensuales."""
         
-        # Convertir ingresos mensuales a ganancia neta imponible acumulada
-        ganancia_neta_imponible = ingresos_mensuales * 12  # Proyectamos a la ganancia anual
-        
-        # Definir la escala de retenciones
-        tramos = [
-            (0, 1200000, 0, Decimal('0.05')),
-            (1200000, 2400000, 60000, Decimal('0.09')),
-            (2400000, 3600000, 168000, Decimal('0.12')),
-            (3600000, 5400000, 312000, Decimal('0.15')),
-            (5400000, 10800000, 582000, Decimal('0.19')),
-            (10800000, 16200000, 1608000, Decimal('0.23')),
-            (16200000, 24300000, 2850000, Decimal('0.27')),
-            (24300000, 36450000, 5037000, Decimal('0.31')),
-            (36450000, float('inf'), 8803500, Decimal('0.35'))
+        escala = [
+            (1900000, Decimal('54149.99')),
+            (2000000, Decimal('10939.98')),
+            (2100000, Decimal('19879.97')),
+            (2200000, Decimal('30799.96')),
+            (2300000, Decimal('44141.80')),
+            (2400000, Decimal('61979.36')),
+            (2500000, Decimal('80979.36')),
+            (2600000, Decimal('100079.35')),
+            (2700000, Decimal('118979.36')),
+            (2800000, Decimal('138817.12')),
+            (2900000, Decimal('158654.88')),
+            (3000000, Decimal('178492.64')),
+            (3100000, Decimal('198330.40')),
+            (3200000, Decimal('218168.16')),
+            (3300000, Decimal('238005.92')),
+            (3400000, Decimal('257843.68')),
+            (3500000, Decimal('277681.44')),
         ]
         
-        retencion = Decimal('0.00') # Inicializa retención
+        # Encontramos el importe según la escala de ingresos mensuales
+        retencion = Decimal('0.00')# Inicializa la retención como 0
+        for ingreso_bruto, importe in escala:
+            if ingresos_mensuales <= ingreso_bruto:# Si los ingresos mensuales caen en un tramo de la escala
+                retencion = importe
+                break
+        else:
+            # Si los ingresos superan el último rango, tomamos la última retención
+            retencion = escala[-1][1]
+        
+        # Redondeamos la retención a dos decimales
+        return retencion.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        for limite_inferior, limite_superior, cuota_fija, porcentaje in tramos:
-            if ganancia_neta_imponible > limite_inferior:
-                # Calcular el exceso sobre el límite inferior
-                exceso = min(ganancia_neta_imponible, limite_superior) - limite_inferior
-                retencion += cuota_fija + (exceso * porcentaje) # Calcula retención
-            else:
-                break # Sale del bucle si se alcanza el límite
-
-        # Redondear el resultado a 2 decimales
-        retencion = retencion.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)  # Redondea la retención
-        return retencion  # Retorna la retención calculada
-    
     def calcular_iva(self, ingresos_mensuales):
         """Calcula el IVA en base a los ingresos mensuales."""
-        # Suponiendo que el IVA es del 21%
+        # El IVA se calcula como el 21% de los ingresos mensuales
         iva = ingresos_mensuales * Decimal('0.21')
-        iva = iva.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)  # Redondear a 2 decimales
-        return iva
+        return iva.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)# Redondea el valor del IVA a dos decimales usando la regla de redondeo estándar
+
+    def ajustar_si_fin_de_semana(self, fecha):
+        """Ajusta la fecha de vencimiento si cae en fin de semana. Mueve la fecha al último día hábil anterior si cae en sábado o domingo."""
+        # Si la fecha es un sábado (weekday() devuelve 5) o un domingo (weekday() devuelve 6),
+        # resta días hasta que sea un día de semana (lunes a viernes, weekday() <= 4)
+        while fecha.weekday() > 4:  # 5 es sábado, 6 es domingo
+            fecha += timedelta(days=1)# Avanza un día hasta que sea lunes (día hábil)
+        return fecha
 
     def calcular_vencimiento_ganancias(self):
-        """Calcula la fecha de vencimiento ajustando al último día del mes si es necesario."""
-        hoy = date.today() # Obtiene la fecha actual
-        ultimo_dia_mes = calendar.monthrange(hoy.year, hoy.month)[1]  # Último día del mes
-        vencimiento = hoy.replace(day=min(30, ultimo_dia_mes))  # Si el mes tiene menos de 30 días, ajusta al último día
+        """Calcula la fecha de vencimiento del impuesto a las ganancias, que es el día 20 de cada mes. Si el día 20 cae en fin de semana, ajusta la fecha al día hábil siguiente."""
+        # Fija el vencimiento en el día 20 del mes actual
+        if date.today().day > 20:
+            # Si hoy es después del día 20, establece el vencimiento para el mes siguiente
+            vencimiento = (date.today().replace(day=1) + timedelta(days=32)).replace(day=20)  # Primer día del siguiente mes
+        else:
+            vencimiento = date.today().replace(day=20)
 
-        # Ajustar si cae en fin de semana
-        while vencimiento.weekday() > 4:  # Si el vencimiento cae en sábado o domingo
-            vencimiento -= timedelta(days=1)
-        return vencimiento
+        # Ajusta la fecha si cae en fin de semana
+        return self.ajustar_si_fin_de_semana(vencimiento)
+
 
     def calcular_vencimiento_monotributo(self):
-        """Calcula la fecha de vencimiento del monotributo (día 20 de cada mes)."""
-        vencimiento = date.today().replace(day=20)
-        # Ajustar si el 20 cae en fin de semana
-        while vencimiento.weekday() > 4:
-            vencimiento += timedelta(days=1)
-        return vencimiento
-    
+        """Calcula la fecha de vencimiento del monotributo, que es el día 20 de cada mes. Si el día 20 cae en fin de semana, ajusta la fecha al día hábil siguiente."""
+        # Fija el vencimiento en el día 20 del mes actual
+        if date.today().day > 20:
+            # Si hoy es después del día 20, establece el vencimiento para el mes siguiente
+            vencimiento = (date.today().replace(day=1) + timedelta(days=32)).replace(day=20)
+        else:
+            vencimiento = date.today().replace(day=20)
+
+        # Ajusta la fecha si cae en fin de semana
+        return self.ajustar_si_fin_de_semana(vencimiento)
+
+
     def calcular_vencimiento_iva(self):
-        """Calcula la fecha de vencimiento del IVA (día 15 de cada mes)."""
-        vencimiento = date.today().replace(day=15)
-        while vencimiento.weekday() > 4:
-            vencimiento += timedelta(days=1)
-        return vencimiento
+        """Calcula la fecha de vencimiento del IVA, que es el día 20 de cada mes. Si el día 20 cae en fin de semana, ajusta la fecha al día hábil siguiente."""
+        # Fija el vencimiento en el día 20 del mes actual
+        if date.today().day > 20:
+            # Si hoy es después del día 20, establece el vencimiento para el mes siguiente
+            vencimiento = (date.today().replace(day=1) + timedelta(days=32)).replace(day=20)
+        else:
+            vencimiento = date.today().replace(day=20)
+
+        # Ajusta la fecha si cae en fin de semana
+        return self.ajustar_si_fin_de_semana(vencimiento)

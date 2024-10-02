@@ -13,8 +13,7 @@ class ObligacionesFiscalesController(APIView):
 
         # Filtramos las obligaciones fiscales según el usuario
         obligaciones = ObligacionFiscal.objects.filter(usuario_id=usuario)
-        
+
         # Serializamos las obligaciones
         serializer = ObligacionFiscalSerializer(obligaciones, many=True)
         return Response(serializer.data)
-

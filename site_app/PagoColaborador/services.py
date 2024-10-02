@@ -1,9 +1,21 @@
 from .models import PagoColaborador
+from Colaborador.models import Colaborador
 
 class PagosColaboradoresService:
+    
     @staticmethod
     def registrar_pago(colaborador_id, monto, fecha_pago, descripcion):
-        pago = PagoColaborador(colaborador_id=colaborador_id, monto=monto, fecha_pago=fecha_pago, descripcion=descripcion)
+        try:
+            colaborador = Colaborador.objects.get(id=colaborador_id)
+        except Colaborador.DoesNotExist:
+            raise ValueError("El colaborador no existe")
+
+        pago = PagoColaborador(
+            colaborador_id=colaborador,  
+            monto=monto,
+            fecha_pago=fecha_pago,
+            descripcion=descripcion
+        )
         pago.save()
         return pago
 

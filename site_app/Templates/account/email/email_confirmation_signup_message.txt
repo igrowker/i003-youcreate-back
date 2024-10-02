@@ -1,0 +1,8 @@
+¡Bienvenido a YouCreate!
+
+Por favor, confirme su dirección de correo electrónico.
+
+Para confirmar su dirección de correo electrónico registrada, haga clic en el botón a continuación.
+[Confirmar Correo]({{ Usuario.urls.rest_verify_email }})
+
+Si no desea confirmar su dirección de correo electrónico o no realizó esta solicitud, puede ignorar y eliminar este correo de forma segura.
