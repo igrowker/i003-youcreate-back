@@ -23,6 +23,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://127.0.0.1:4200"
 ]
 
 INSTALLED_APPS = [
@@ -44,7 +45,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.mfa",
-    'allauth.headless',
+    # 'allauth.headless',
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.apple",
     "dj_rest_auth.registration",
@@ -156,7 +157,7 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # No need to sent POST request to confirmation link
 
-HEADLESS_ONLY = True
+# HEADLESS_ONLY = True
 # HEADLESS_FRONTEND_URLS = {
 #     "account_confirm_email": "/account/verify-email/{key}",
 #     "account_reset_password": "/account/password/reset",
