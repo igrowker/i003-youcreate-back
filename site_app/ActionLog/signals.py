@@ -36,11 +36,11 @@ def user_action_log(sender, instance, created, **kwargs):
                 'old_value': old_instance.apellido,
                 'new_value': instance.apellido
             })
-        if old_instance and old_instance.correo != instance.correo:
+        if old_instance and old_instance.email != instance.email:
             changes.append({
-                'field': 'correo',
-                'old_value': old_instance.correo,
-                'new_value': instance.correo
+                'field': 'email',
+                'old_value': old_instance.email,
+                'new_value': instance.email
             })
         if old_instance and old_instance.telefono != instance.telefono:
             changes.append({
@@ -60,6 +60,7 @@ def user_action_log(sender, instance, created, **kwargs):
                 'old_value': old_instance.redes_sociales,
                 'new_value': instance.redes_sociales
             })
+        # TODO: Add field for "numero_fiscal"
 
         if changes:
             details = "; ".join([f"Campo '{change['field']}' cambiado de '{change['old_value']}' a '{change['new_value']}'"
