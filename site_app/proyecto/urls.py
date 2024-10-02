@@ -12,6 +12,8 @@ urlpatterns = [
         name="account_confirm_email",
     ),
     path("auth/registration/", include("dj_rest_auth.registration.urls")),
+    path("accounts/", include("allauth.urls")),
+    # path("_allauth/", include("allauth.headless.urls")),
     path("api/", include("PagoColaborador.urls")),
     path("api/", include("Colaborador.urls")),
     path("api/", include("ObligacionFiscal.urls")),

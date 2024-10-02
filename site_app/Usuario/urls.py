@@ -1,9 +1,23 @@
 from allauth.socialaccount.views import signup
-from django.urls import path
+from dj_rest_auth.views import PasswordResetView, PasswordResetConfirmView
+from django.urls import path, include
+from django.views.generic import TemplateView
+
 from .views import GoogleLogin
 
 urlpatterns = [
     # TODO: Add user editing url
-    path("signup/", signup, name="socialaccount_signup"),
+    path("signup/", signup, name="account_signup"),
     path("google/", GoogleLogin.as_view(), name="google_login"),
+    path("password/reset/", PasswordResetView.as_view(), name="rest_password_reset"),
+    path(
+        "password/reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="rest_password_reset_confirm",
+    ),
+    path(
+        "password-reset/confirm/<uidb64>/<token>/",
+        TemplateView.as_view(),
+        name="password_reset_confirm",
+    ),
 ]

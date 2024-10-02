@@ -19,7 +19,8 @@ class CustomRegisterSerializer(RegisterSerializer):
     last_name = None
 
     email = serializers.EmailField(
-        required=settings.ACCOUNT_EMAIL_REQUIRED, validators=[UniqueValidator(queryset=CustomUser.objects.all())]
+        required=settings.ACCOUNT_EMAIL_REQUIRED,
+        validators=[UniqueValidator(queryset=CustomUser.objects.all())],
     )
     password1 = serializers.CharField(
         write_only=True,
@@ -67,7 +68,6 @@ class CustomRegisterSerializer(RegisterSerializer):
         user.numero_fiscal = self.validated_data.get("numero_fiscal")
         # TODO: Hash user sensitive data --> numero_fiscal, redes_sociales, telefonos?
 
-
         user.set_password(self.validated_data["password1"])
         user.save()
         return user
@@ -95,6 +95,7 @@ class CustomRegisterSerializer(RegisterSerializer):
             "numero_fiscal": {"required": False, "allow_blank": True},
         }
 
+
 class CustomLoginSerializer(LoginSerializer):
     username = None
     email = serializers.EmailField(required=True)
@@ -108,7 +109,6 @@ class CustomLoginSerializer(LoginSerializer):
             allauth_account_settings.AUTHENTICATION_METHOD
             == allauth_account_settings.AuthenticationMethod.EMAIL
         ):
-            print("Inside get_auth_user_using_allauth")
             return self._validate_email(email, password)
 
         # Authentication through username

@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "Usuario",
-    # "Usuario.apps.UsuarioConfig",
     "Colaborador",
     "Ingreso",
     "PagoColaborador",
@@ -50,7 +49,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.apple",
-    # "dj_rest_auth",
+    "allauth.mfa",
+    # "allauth.headless",
     "dj_rest_auth.registration",
 ]
 
@@ -64,6 +64,7 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Simple JWT config
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
         # TODO: Change back to 5 minutes for production
@@ -87,6 +88,7 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "Usuario.serializers.CustomTokenObtainPairSerializer",
 }
 
+# Django Rest Auth config
 REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "access",
@@ -98,7 +100,6 @@ REST_AUTH = {
     "REGISTER_SERIALIZER": "Usuario.serializers.CustomRegisterSerializer",
     "LOGIN_SERIALIZER": "Usuario.serializers.CustomLoginSerializer",
     "LOGOUT_ON_PASSWORD_CHANGE": True,
-    # TODO: Test URL
     "LOGOUT_REDIRECT_URL": "auth/login/",
 }
 
@@ -156,12 +157,32 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # No need to sent POST request to confirmation link
 
+# HEADLESS_ONLY = True
+# HEADLESS_FRONTEND_URLS = {
+#     "account_confirm_email": "/account/verify-email/{key}",
+#     "account_reset_password": "/account/password/reset",
+#     "account_reset_password_from_key": "/account/password/reset/key/{key}",
+#     "account_signup": "/account/signup",
+#     "socialaccount_login_error": "/account/provider/callback",
+# }
+
+# Activa la autenticación multifactor con TOTP
+MFA_SUPPORTED_TYPES = ["totp"]
+MFA_TOTP_PERIOD = 60  # 1 minuto de duración para el código TOTP
+MFA_ADAPTER = "allauth.mfa.adapter.DefaultMFAAdapter"
+MFA_TOTP_ISSUER = "YouCreate"
+# MFA default forms, se pueden cambiar los formularios usados en la autenticación multifactor
+MFA_FORMS = {
+    'authenticate': 'allauth.mfa.base.forms.AuthenticateForm',
+    'reauthenticate': 'allauth.mfa.base.forms.AuthenticateForm',
+    'activate_totp': 'allauth.mfa.totp.forms.ActivateTOTPForm',
+    'deactivate_totp': 'allauth.mfa.totp.forms.DeactivateTOTPForm',
+    'generate_recovery_codes': 'allauth.mfa.recovery_codes.forms.GenerateRecoveryCodesForm',
+}
+
 LOGIN_URL = "auth/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "Usuario.auth_backend.CustomPasswordValidator",
-    },
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
@@ -174,15 +195,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+    {
+        "NAME": "Usuario.auth_backend.CustomPasswordValidator",
+    },
 ]
-
-# Security settings
-# SECURE_SSL_REDIRECT = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# SECURE_BROWER_XSS_FILTER = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_SSL_REDIRECT = True
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",

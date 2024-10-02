@@ -21,12 +21,15 @@ class CustomUser(AbstractUser):
     numero_fiscal = models.CharField(max_length=25)
     monotributo = models.BooleanField(default=False)
 
-    verified = models.BooleanField(
-        default=False
-    )  # Confirma si el usuario ha verificado su correo
+    # Crea los campos adicionales usados para la autenticación con OTP/MFA
+    # is_mfa_enabled = models.BooleanField(default=False)
+    # otp_secret = models.CharField(max_length=16, blank=True, null=True)
+
+    # Añade un campo para el rol del usuario
     role = models.CharField(
         max_length=255, choices=Roles.choices, default=Roles.USUARIO
     )
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
