@@ -40,18 +40,18 @@ INSTALLED_APPS = [
     "PagoColaborador",
     "ObligacionFiscal",
     "corsheaders",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.mfa",
+    'allauth.headless',
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.apple",
+    "dj_rest_auth.registration",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
-    "allauth.socialaccount.providers.apple",
-    "allauth.mfa",
-    # "allauth.headless",
-    "dj_rest_auth.registration",
 ]
 
 REST_FRAMEWORK = {
@@ -110,7 +110,6 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    # "Usuario.middleware.UserValidationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",  # Django AllAuth Middleware
@@ -157,7 +156,7 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # No need to sent POST request to confirmation link
 
-# HEADLESS_ONLY = True
+HEADLESS_ONLY = True
 # HEADLESS_FRONTEND_URLS = {
 #     "account_confirm_email": "/account/verify-email/{key}",
 #     "account_reset_password": "/account/password/reset",
