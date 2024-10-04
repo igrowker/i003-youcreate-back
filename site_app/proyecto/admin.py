@@ -4,22 +4,22 @@ from django.contrib.auth.admin import UserAdmin
 from Usuario.models import CustomUser
 
 
-
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
     list_display = (
         "id",
         "nombre",
         "apellido",
-        "correo",
+        "email",
         "telefono",
         "password",
-        "verificado",
+        "verified",
         "pais_residencia",
         "redes_sociales",
-        "activo",
+        "is_active",
+        "monotributo",
     )
-    list_filter = ("verificado", "activo")
+
     fieldsets = (
         (
             None,
@@ -27,15 +27,18 @@ class CustomUserAdmin(UserAdmin):
                 "fields": (
                     "nombre",
                     "apellido",
-                    "correo",
+                    "email",
                     "telefono",
                     "password",
-                    "verificado",
                     "pais_residencia",
                     "redes_sociales",
-                    "activo",
+                    "numero_fiscal",
                 )
             },
+        ),
+        (
+            "Permissions",
+            {"fields": ("is_staff", "is_superuser", "is_active", "role", "verified")},
         ),
     )
     add_fieldsets = (
@@ -43,18 +46,14 @@ class CustomUserAdmin(UserAdmin):
         {
             "classes": ("wide",),
             "fields": (
-                "nombre",
-                "apellido",
-                "correo",
-                "password1",
+                "email",
+                "password",
                 "password2",
-                "verificado",
-                "pais_residencia",
-                "redes_sociales",
-                "activo",
             ),
         },
     )
+
+    list_filter = ["verified", "is_active", "role"]
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
