@@ -3,6 +3,13 @@ from django.db.models import Sum,F
 
 #El repositorio es el encargado de interactuar con la base de datos
 class IngresosRepository:
+
+    #Cargo en la base de datos el ingreso pasado por parametro
+    @staticmethod
+    def guardar_ingreso(ingreso):
+        ingreso.save()
+        return ingreso
+
     #Devolver todos los ingresos asociados a un usuario
     @staticmethod
     def obtener_ingresos_usuario(usuario_id):
@@ -33,8 +40,3 @@ class IngresosRepository:
                 .values(anio=F('fecha__year'))
                 .annotate(total=Sum('monto'))
                 .order_by('anio'))
-
-
-
-
-

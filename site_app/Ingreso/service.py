@@ -1,6 +1,14 @@
 from .repository import IngresosRepository
+from datetime import date
+from .models import Ingreso
 #Servicio que va ser utilizado por el controlador
 class IngresosService:
+    def crear_ingreso(self,usuario_id,monto,origen,fecha=None):
+        if fecha is None:
+            fecha = date.today()
+        nuevo_ingreso = Ingreso(usuario_id=usuario_id,monto=monto,origen=origen,fecha=fecha)
+        return IngresosRepository.guardar_ingreso(nuevo_ingreso)
+
     def obtener_ingresos_usuario(self, usuario_id) -> dict:
         return IngresosRepository.obtener_ingresos_usuario(usuario_id)
 

@@ -1,13 +1,13 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
-from .models import Ingreso, Usuario  # Asegúrate de importar el modelo Usuario
+from .models import Ingreso, CustomUser  
 from decimal import Decimal
 
 class IngresosControllerTests(APITestCase):
     def setUp(self):
         # Crea un usuario para las pruebas (usa el campo correcto aquí)
-        self.usuario = Usuario.objects.create(
+        self.usuario = CustomUser.objects.create(
             nombre='Test User', 
             correo='testuser@example.com', 
             password='testpassword', 
@@ -33,6 +33,26 @@ class IngresosControllerTests(APITestCase):
             fecha='2023-09-10', 
             usuario_id=self.usuario
         )
+
+    def test_crear_ingreso(self):
+        url = reverse('crear-ingreso')
+    
+        data = {
+            'usuario_id': self.usuario.id,
+            'monto': '999',
+            'origen': 'Prueba',
+            'fecha': '2024-10-05'
+        }
+        
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Ingreso.objects.count(), 4)  # Ya hay 3 ingresos en setUp
+        
+        # Verifica que los datos del ingreso creado sean correctos
+        nuevo_ingreso = Ingreso.objects.last()
+        self.assertEqual(nuevo_ingreso.monto, Decimal('999'))
+        self.assertEqual(nuevo_ingreso.origen, 'Prueba')
+        self.assertEqual(nuevo_ingreso.usuario_id, self.usuario)
 
     def test_obtener_ingresos_usuario(self):
         # Define la URL usando el ID del usuario
