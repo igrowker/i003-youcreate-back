@@ -1,5 +1,7 @@
-from .models import ObligacionFiscal, CustomUser
 from datetime import date
+
+from .models import ObligacionFiscal
+
 
 class ObligacionesFiscalesRepository:
     def __init__(self, usuario):
@@ -9,7 +11,14 @@ class ObligacionesFiscalesRepository:
         """Obtiene las obligaciones fiscales del usuario."""
         return ObligacionFiscal.objects.filter(usuario=self.usuario)
 
-    def guardar_obligacion(self, tipo_impuesto, monto_a_pagar, fecha_vencimiento, estado_pago=False, email_automatico=False):
+    def guardar_obligacion(
+        self,
+        tipo_impuesto,
+        monto_a_pagar,
+        fecha_vencimiento,
+        estado_pago=False,
+        email_automatico=False,
+    ):
         """
         Guarda o actualiza una obligación fiscal según las siguientes reglas:
         1. Crea un registro si no hay registro en el mes.
@@ -21,7 +30,7 @@ class ObligacionesFiscalesRepository:
             usuario=self.usuario,
             tipo_impuesto=tipo_impuesto,
             fecha_vencimiento__year=fecha_vencimiento.year,
-            fecha_vencimiento__month=fecha_vencimiento.month
+            fecha_vencimiento__month=fecha_vencimiento.month,
         )
 
         # Si hay obligaciones existentes
@@ -37,19 +46,19 @@ class ObligacionesFiscalesRepository:
                     monto_a_pagar=monto_a_pagar,
                     fecha_vencimiento=fecha_vencimiento,
                     estado_pago=estado_pago,
-                    email_automatico=email_automatico
+                    email_automatico=email_automatico,
                 )
                 return nueva_obligacion
-            
+
             # Si el estado_pago cambia, actualizar la obligación existente
             if obligacion.estado_pago != estado_pago:
                 obligacion.estado_pago = estado_pago
-                obligacion.save(update_fields=['estado_pago'])
+                obligacion.save(update_fields=["estado_pago"])
 
             # Si el email_automatico cambia, actualizar la obligación existente
             if obligacion.email_automatico != email_automatico:
                 obligacion.email_automatico = email_automatico
-                obligacion.save(update_fields=['email_automatico'])
+                obligacion.save(update_fields=["email_automatico"])
 
             return obligacion
 
@@ -60,7 +69,7 @@ class ObligacionesFiscalesRepository:
             monto_a_pagar=monto_a_pagar,
             fecha_vencimiento=fecha_vencimiento,
             estado_pago=estado_pago,
-            email_automatico=email_automatico
+            email_automatico=email_automatico,
         )
 
         return nueva_obligacion
