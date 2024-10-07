@@ -1,5 +1,5 @@
 from .models import Ingreso
-from django.db.models import Sum,F
+from django.db.models import Sum
 
 #El repositorio es el encargado de interactuar con la base de datos
 class IngresosRepository:
@@ -28,15 +28,26 @@ class IngresosRepository:
     
     # Devolver los ingresos agrupados por mes 
     @staticmethod
-    def obtener_ingresos_por_mes(usuario_id, mes):
+    def obtener_ingresos_por_mes(usuario_id, mes,anio):
         # Se filtran los ingresos correspondientes a un usuario_id por mes
-        return Ingreso.objects.filter(usuario_id=usuario_id, fecha__month=mes)
+        resultado = (Ingreso.objects.filter(usuario_id=usuario_id, fecha__month=mes, fecha__year=anio)
+                     .aggregate(total=Sum('monto')))
+         # Verificar si se encontraron ingresos y devolver el resultado en el formato deseado
+        total_monto = resultado['total'] if resultado['total'] is not None else 0
+        return {mes: total_monto}
 
     # Devolver los ingresos agrupados por año
     @staticmethod
     def obtener_ingresos_por_anio(usuario_id, anio):
-    # Agrupar los ingresos por año y calcular el total, renombrando 'fecha__year' a 'anio'
-        return (Ingreso.objects.filter(usuario_id=usuario_id, fecha__year=anio)
-                .values(anio=F('fecha__year'))
-                .annotate(total=Sum('monto'))
-                .order_by('anio'))
+        # Filtrar los ingresos por año y sumar los montos
+        resultado = (Ingreso.objects.filter(usuario_id=usuario_id, fecha__year=anio)
+                 .aggregate(total=Sum('monto')))
+    
+        # Verificar si se encontraron ingresos y devolver el resultado en el formato deseado
+        total_monto = resultado['total'] if resultado['total'] is not None else 0
+        return {anio: total_monto}
+    
+    #Devolver un ingreso especifico de un usuario
+    @staticmethod
+    def obtener_ingreso_usuario(usuario_id, ingreso_id):
+        return Ingreso.objects.get(usuario_id=usuario_id, id=ingreso_id)
