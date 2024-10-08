@@ -22,8 +22,8 @@ def enviar_notificacion_vencimiento():
 
     for obligacion in obligaciones:
         usuario = obligacion.usuario
-        print(f"Enviando correo a {usuario.correo} por obligación : {obligacion.tipo_impuesto}")
-        enviar_correo_vencimiento(usuario.correo, obligacion)
+        print(f"Enviando correo a {usuario.email} por obligación : {obligacion.tipo_impuesto}")
+        enviar_correo_vencimiento(usuario.email, obligacion)
 
         # Actualizar la fecha de notificación a hoy
         obligacion.fecha_notificacion = hoy

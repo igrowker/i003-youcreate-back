@@ -11,6 +11,7 @@ class CustomUser(AbstractUser):
 
     # Crea los campos del modelo CustomUser
     id = models.AutoField(primary_key=True)
+    username = models.CharField(max_length=255, unique=True)
     nombre = models.CharField(max_length=255)
     apellido = models.CharField(max_length=255)
     email = models.EmailField(unique=True, max_length=255)
