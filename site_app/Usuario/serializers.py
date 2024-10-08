@@ -152,3 +152,18 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["pais"] = usuario.pais_residencia
         token["role"] = usuario.role
         return token
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['nombre', 'apellido', 'telefono', 'email', 'pais_residencia', 'redes_sociales']
+
+    # Validación para asegurar que el correo sea único (si es necesario cambiar el correo)
+    def validate_email(self, value):
+        user = self.context['request'].user
+        if CustomUser.objects.exclude(id=user.id).filter(email=value).exists():
+            raise serializers.ValidationError("Este correo ya está en uso.")
+        return value
+"""
+El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
+"""

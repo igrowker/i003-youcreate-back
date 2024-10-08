@@ -4,6 +4,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 
 from .views import GoogleLogin
+from .views import UserUpdateView
 
 urlpatterns = [
     # TODO: Add user editing url
@@ -20,4 +21,5 @@ urlpatterns = [
         TemplateView.as_view(),
         name="password_reset_confirm",
     ),
+    path('user/update/', UserUpdateView.as_view(), name='user-update'),  # Ruta para la actualización de usuario
 ]
