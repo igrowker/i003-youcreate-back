@@ -1,23 +1,26 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-import pyotp #2fa
+import pyotp  # 2fa
+
 
 class CustomUser(AbstractUser):
-    # OTP/2FA--------
+
     otp_secret = models.CharField(max_length=16, blank=True, null=True)
-    is_mfa_enabled = models.BooleanField(default=True)
+    is_mfa_enabled = models.BooleanField(default=False)
 
     def generate_otp_secret(self):
-        self.otp_secret = pyotp.random_base32()
+        self.otp_secret = pyotp.random_base32()  # Generar secreto OTP
         self.save()
 
-    def get_otp_code(self, interval=120):  # Cambiar el valor intervalo a lo que necesites, e.g., 60
-        if not self.otp_secret:
+    # Cambiar el valor intervalo a lo que necesites, e.g., 60
+    def get_otp_code(self, interval=120):
+        if not self.otp_secret:  # Si no tiene secreto, no puede obtener el código OTP
             self.generate_otp_secret()
+        # Crear TOTP con el secreto
         totp = pyotp.TOTP(self.otp_secret, interval=interval)
-        return totp.now()
-    # OTP/2FA--------
+        return totp.now()  # Obtener el código OTP
+
     class Roles(models.TextChoices):
         ADMIN = "Administrador"
         COLABORADOR = "Colaborador"
@@ -73,7 +76,8 @@ class UserManager(BaseUserManager):
             raise ValueError("Apellido no puede estar vacío")
 
         email = self.normalize_email(email)
-        user = self.model(email=email, nombre=nombre, apellido=apellido, **extra_fields)
+        user = self.model(email=email, nombre=nombre,
+                          apellido=apellido, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user

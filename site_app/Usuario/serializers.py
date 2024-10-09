@@ -4,8 +4,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueValidator
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import authenticate # 2fa
-from .utils import send_otp_via_email, verify_otp # 2fa
+from django.contrib.auth import authenticate  # 2fa
+from .utils import verify_otp  # 2fa
 
 from proyecto import settings
 
@@ -35,7 +35,8 @@ class CustomRegisterSerializer(RegisterSerializer):
     pais_residencia = serializers.CharField(required=True)
     redes_sociales = serializers.JSONField(required=False, allow_null=True)
     telefono = serializers.CharField(required=False, allow_blank=True)
-    numero_fiscal = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    numero_fiscal = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True)
 
     def get_cleaned_data(self):
         return {
@@ -154,10 +155,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["role"] = usuario.role
         return token
 
+
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['nombre', 'apellido', 'telefono', 'email', 'pais_residencia', 'redes_sociales']
+        fields = ['nombre', 'apellido', 'telefono',
+                  'email', 'pais_residencia', 'redes_sociales']
 
     # Validación para asegurar que el correo sea único (si es necesario cambiar el correo)
     def validate_email(self, value):
@@ -165,11 +168,12 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         if CustomUser.objects.exclude(id=user.id).filter(email=value).exists():
             raise serializers.ValidationError("Este correo ya está en uso.")
         return value
+
+
 """
 El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
 """
 
-# 2fa-----------
 
 class TwoFALoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -184,15 +188,17 @@ class TwoFALoginSerializer(serializers.Serializer):
         if not user:
             raise exceptions.ValidationError("Credenciales inválidas.")
 
-        if user.is_mfa_enabled and "otp_code" not in attrs:
-            send_otp_via_email(user)
-            raise exceptions.ValidationError("OTP enviado a tu correo.")
-        
-        if user.is_mfa_enabled and "otp_code" in attrs:
+        if user.is_mfa_enabled:
+            # No enviar el OTP inmediatamente, solo informar que se requiere 2FA
+            if "otp_code" not in attrs:
+                return {
+                    "user": user,
+                    "mfa_required": True
+                }
+
             otp_code = attrs["otp_code"]
             if not verify_otp(user, otp_code):
                 raise exceptions.ValidationError("Código OTP inválido.")
 
         attrs['user'] = user
         return attrs
-# 2fa-----------------
