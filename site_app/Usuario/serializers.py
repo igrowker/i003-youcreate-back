@@ -32,9 +32,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     pais_residencia = serializers.CharField(required=True)
     redes_sociales = serializers.JSONField(required=False, allow_null=True)
     telefono = serializers.CharField(required=False, allow_blank=True)
-    numero_fiscal = serializers.CharField(
-        required=False, allow_blank=True, allow_null=True
-    )
+    numero_fiscal = serializers.CharField(required=False)
 
     def get_cleaned_data(self):
         return {
@@ -67,6 +65,8 @@ class CustomRegisterSerializer(RegisterSerializer):
         user.redes_sociales = self.validated_data.get("redes_sociales")
         user.telefono = self.validated_data.get("telefono")
         user.numero_fiscal = self.validated_data.get("numero_fiscal")
+        if not user.numero_fiscal:
+            user.numero_fiscal = ""
         # TODO: Hash user sensitive data --> numero_fiscal, redes_sociales, telefonos?
 
         user.set_password(self.validated_data["password1"])
