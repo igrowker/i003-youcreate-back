@@ -29,8 +29,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
     "http://localhost:4200",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:4200",
+    "https://you-create-backend-service.onrender.com",
 ]
 
 INSTALLED_APPS = [
@@ -179,20 +178,6 @@ ACCOUNT_LOGIN_BY_CODE_ENABLED = True
 #     "socialaccount_login_error": "/account/provider/callback",
 # }
 
-# Activa la autenticación multifactor con TOTP
-MFA_SUPPORTED_TYPES = ["totp"]
-MFA_TOTP_PERIOD = 60  # 1 minuto de duración para el código TOTP
-MFA_ADAPTER = "allauth.mfa.adapter.DefaultMFAAdapter"
-MFA_TOTP_ISSUER = "YouCreate"
-# MFA default forms, se pueden cambiar los formularios usados en la autenticación multifactor
-MFA_FORMS = {
-    "authenticate": "allauth.mfa.base.forms.AuthenticateForm",
-    "reauthenticate": "allauth.mfa.base.forms.AuthenticateForm",
-    "activate_totp": "allauth.mfa.totp.forms.ActivateTOTPForm",
-    "deactivate_totp": "allauth.mfa.totp.forms.DeactivateTOTPForm",
-    "generate_recovery_codes": "allauth.mfa.recovery_codes.forms.GenerateRecoveryCodesForm",
-}
-
 # URLs
 LOGIN_URL = "auth/login/"
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "localhost:4200/home"
@@ -251,14 +236,6 @@ EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-# <PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL>/<uidb64>/<token>/
-PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = (
-    "http://localhost:8000/password-reset/confirm/"
-)
-
-ACCOUNT_EMAIL_VERIFICATION_SENT_REDIRECT_URL = (
-    "auth/registration/email-verification/sent/"
-)
 
 # Social auth
 SOCIALACCOUNT_PROVIDERS = {
