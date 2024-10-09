@@ -4,6 +4,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueValidator
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import authenticate # 2fa
+from .utils import send_otp_via_email, verify_otp # 2fa
 
 from proyecto import settings
 
@@ -166,3 +168,31 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 """
 El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
 """
+
+# 2fa-----------
+
+class TwoFALoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    otp_code = serializers.CharField(write_only=True, required=False)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+        user = authenticate(email=email, password=password)
+
+        if not user:
+            raise exceptions.ValidationError("Credenciales inválidas.")
+
+        if user.is_mfa_enabled and "otp_code" not in attrs:
+            send_otp_via_email(user)
+            raise exceptions.ValidationError("OTP enviado a tu correo.")
+        
+        if user.is_mfa_enabled and "otp_code" in attrs:
+            otp_code = attrs["otp_code"]
+            if not verify_otp(user, otp_code):
+                raise exceptions.ValidationError("Código OTP inválido.")
+
+        attrs['user'] = user
+        return attrs
+# 2fa-----------------

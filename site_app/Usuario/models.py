@@ -1,9 +1,23 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+import pyotp #2fa
 
 class CustomUser(AbstractUser):
+    # OTP/2FA--------
+    otp_secret = models.CharField(max_length=16, blank=True, null=True)
+    is_mfa_enabled = models.BooleanField(default=True)
+
+    def generate_otp_secret(self):
+        self.otp_secret = pyotp.random_base32()
+        self.save()
+
+    def get_otp_code(self, interval=120):  # Cambiar el valor intervalo a lo que necesites, e.g., 60
+        if not self.otp_secret:
+            self.generate_otp_secret()
+        totp = pyotp.TOTP(self.otp_secret, interval=interval)
+        return totp.now()
+    # OTP/2FA--------
     class Roles(models.TextChoices):
         ADMIN = "Administrador"
         COLABORADOR = "Colaborador"

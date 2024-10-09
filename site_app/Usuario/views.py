@@ -8,7 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import CustomUser
 from .serializers import UserUpdateSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth import login # 2fa
+from .serializers import TwoFALoginSerializer # 2fa
+
 
 from proyecto.settings import BASE_URL_DEV
 
@@ -39,3 +42,15 @@ class UserUpdateView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# 2fa
+class TwoFALoginView(APIView):
+    permission_classes = (AllowAny,)
+    def post(self, request):
+        serializer = TwoFALoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+
+        login(request, user)
+        return Response({"detail": "Inicio de sesión exitoso"}, status=status.HTTP_200_OK)
+ # 2fa
+ 
