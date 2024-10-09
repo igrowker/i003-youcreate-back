@@ -55,6 +55,9 @@ class TwoFALoginView(APIView):
         user = serializer.validated_data['user']
 
         if serializer.validated_data.get('mfa_required'):
+            # Almacenar el email en la sesión para que el endpoint de verificación de 2FA pueda accederlo
+            request.session['email'] = user.email
+
             # Responder que se necesita la verificación 2FA
             send_otp_via_email(user)
             return Response({
@@ -76,10 +79,21 @@ class TwoFAVerifyView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        email = request.data.get('email')
         otp_code = request.data.get('otp_code')
 
-        user = CustomUser.objects.get(email=email)
+        # Obtener el email de la sesión
+        email = request.session.get('email')
+
+        # Verificar si hay un email en la sesión
+        if not email:
+            return Response({"detail": "Sesión no válida o ha expirado."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Obtener al usuario usando el email
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
 
         if not verify_otp(user, otp_code):
             return Response({"detail": "Código OTP inválido."}, status=status.HTTP_400_BAD_REQUEST)

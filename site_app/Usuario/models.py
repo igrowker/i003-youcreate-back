@@ -7,7 +7,7 @@ import pyotp  # 2fa
 class CustomUser(AbstractUser):
 
     otp_secret = models.CharField(max_length=16, blank=True, null=True)
-    is_mfa_enabled = models.BooleanField(default=False)
+    is_mfa_enabled = models.BooleanField(default=False) # habilitar 2fa
 
     def generate_otp_secret(self):
         self.otp_secret = pyotp.random_base32()  # Generar secreto OTP
