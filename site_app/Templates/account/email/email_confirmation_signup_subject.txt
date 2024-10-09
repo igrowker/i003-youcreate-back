@@ -1,0 +1,1 @@
+{{ Usuario.nombre }}, confirma tu cuenta YouCreate!

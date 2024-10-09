@@ -68,4 +68,5 @@ secrets.json
 .secret_key
 
 # Archivos de control de versiones de Django y bases de datos locales
+db.*
 db.sqlite3
