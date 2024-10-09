@@ -10,7 +10,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 BASE_URL_DEV = "http://localhost:8000/"
-BASE_URL_PRODUCTION = ""
+BASE_URL_PRODUCTION = "https://you-create-backend-service.onrender.com/"
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
