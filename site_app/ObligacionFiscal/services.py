@@ -1,5 +1,5 @@
 from .fiscal_strategies.argentina_strategy import ArgentinaFiscalStrategy
-from .repositories import ObligacionesFiscalesRepository
+
 
 class ObligacionesFiscalesService:
     """Servicio para manejar las obligaciones fiscales según el país del usuario."""
@@ -17,7 +17,9 @@ class ObligacionesFiscalesService:
         # elif self.pais == "mexico":
         #     return MexicoFiscalStrategy(self.usuario)
         else:
-            raise ValueError(f"No hay estrategia fiscal disponible para el país: {self.pais}")
+            raise ValueError(
+                f"No hay estrategia fiscal disponible para el país: {self.pais}"
+            )
 
     def manejar_obligaciones(self):
         """Maneja el cálculo y almacenamiento de las obligaciones fiscales."""

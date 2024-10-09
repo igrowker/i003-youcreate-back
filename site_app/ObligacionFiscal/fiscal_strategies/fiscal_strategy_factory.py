@@ -1,6 +1,13 @@
-from .argentina_strategy import ArgentinaFiscalStrategy  # Importa la estrategia fiscal para Argentina
-from .españa_strategy import EspañaFiscalStrategy  # Importa la estrategia fiscal para España
-from .strategy import ObligacionesFiscalesStrategy  # Importa la clase base de estrategias fiscales
+from .argentina_strategy import (
+    ArgentinaFiscalStrategy,
+)  # Importa la estrategia fiscal para Argentina
+from .españa_strategy import (
+    EspañaFiscalStrategy,
+)  # Importa la estrategia fiscal para España
+from .strategy import (
+    ObligacionesFiscalesStrategy,
+)  # Importa la clase base de estrategias fiscales
+
 
 class FiscalStrategyFactory:
     """Fábrica para obtener la estrategia fiscal según el país del usuario."""
@@ -31,10 +38,14 @@ class FiscalStrategyFactory:
         pais = pais_mapping.get(pais, pais)# Convierte el código al nombre completo
 
         # Selecciona la estrategia fiscal según el país
-        if pais == 'argentina':
-            return ArgentinaFiscalStrategy(usuario)  # Retorna la estrategia fiscal para Argentina
-        elif pais == 'españa':
-            return EspañaFiscalStrategy(usuario)  # Retorna la estrategia fiscal para España
+        if pais == "argentina":
+            return ArgentinaFiscalStrategy(
+                usuario
+            )  # Retorna la estrategia fiscal para Argentina
+        elif pais == "españa":
+            return EspañaFiscalStrategy(
+                usuario
+            )  # Retorna la estrategia fiscal para España
         # Se pueden agregar más países y sus estrategias aquí
         else:
             # Si no hay estrategia definida para el país, lanza una excepción

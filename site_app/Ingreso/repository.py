@@ -1,5 +1,7 @@
-from .models import Ingreso
 from django.db.models import Sum
+
+from .models import Ingreso
+
 
 #El repositorio es el encargado de interactuar con la base de datos
 class IngresosRepository:
@@ -42,11 +44,11 @@ class IngresosRepository:
         # Filtrar los ingresos por año y sumar los montos
         resultado = (Ingreso.objects.filter(usuario_id=usuario_id, fecha__year=anio)
                  .aggregate(total=Sum('monto')))
-    
+
         # Verificar si se encontraron ingresos y devolver el resultado en el formato deseado
         total_monto = resultado['total'] if resultado['total'] is not None else 0
         return {anio: total_monto}
-    
+
     #Devolver un ingreso especifico de un usuario
     @staticmethod
     def obtener_ingreso_usuario(usuario_id, ingreso_id):

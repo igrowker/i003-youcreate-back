@@ -1,12 +1,11 @@
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueValidator
-from django.utils.translation import gettext_lazy as _
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from proyecto import settings
-
 from .auth_backend import CustomPasswordValidator
 from .models import CustomUser
 
@@ -33,7 +32,9 @@ class CustomRegisterSerializer(RegisterSerializer):
     pais_residencia = serializers.CharField(required=True)
     redes_sociales = serializers.JSONField(required=False, allow_null=True)
     telefono = serializers.CharField(required=False, allow_blank=True)
-    numero_fiscal = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    numero_fiscal = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
 
     def get_cleaned_data(self):
         return {

@@ -1,6 +1,8 @@
-from rest_framework.test import APITestCase
-from .models import Ingreso, CustomUser 
 from decimal import Decimal
+
+from rest_framework.test import APITestCase
+
+from .models import CustomUser
 from .service import IngresosService
 
 
@@ -24,17 +26,17 @@ class IngresosControllerTests(APITestCase):
         # Crea algunos ingresos para el usuario
         self.ingreso1 = self.servicio_ingreso.crear_ingreso(
             monto=Decimal('100'),
-            origen='Trabajo', 
-            fecha='2024-04-01', 
+            origen='Trabajo',
+            fecha='2024-04-01',
             usuario_id=self.usuario
         )
         self.ingreso1 = self.servicio_ingreso.crear_ingreso(
-            monto=Decimal('150'), 
-            origen='Inversiones', 
-            fecha='2023-04-05', 
+            monto=Decimal('150'),
+            origen='Inversiones',
+            fecha='2023-04-05',
             usuario_id=self.usuario
         )
-        
+
     def test_crear_ingreso(self):
         self.ingreso = self.servicio_ingreso.crear_ingreso(
             usuario_id=self.usuario,
@@ -48,7 +50,7 @@ class IngresosControllerTests(APITestCase):
 
     def test_obtener_ingresos_usuario(self):
         ingresos_usuario = self.servicio_ingreso.obtener_ingresos_usuario(self.usuario)
-        cant = len(ingresos_usuario) #Obtengo la cantidad total de ingresos 
+        cant = len(ingresos_usuario) #Obtengo la cantidad total de ingresos
         self.assertEqual(cant,2)
         self.assertNotEqual(cant,-1)
         self.assertNotEqual(cant,999999)
@@ -61,9 +63,9 @@ class IngresosControllerTests(APITestCase):
 
     def test_obtener_ingresos_por_anio(self):
         ingresos_2024 = self.servicio_ingreso.obtener_ingresos_por_anio(self.usuario,2024)
-        self.assertEqual(ingresos_2024, {2024: Decimal('100')})  
-        self.assertNotEqual(ingresos_2024, {2024: Decimal('-999')})    
-        self.assertNotEqual(ingresos_2024, {2024: Decimal('0')}) 
+        self.assertEqual(ingresos_2024, {2024: Decimal('100')})
+        self.assertNotEqual(ingresos_2024, {2024: Decimal('-999')})
+        self.assertNotEqual(ingresos_2024, {2024: Decimal('0')})
 
     def test_obtener_ingresos_por_mes(self):
         ingresos_abril = self.servicio_ingreso.obtener_ingresos_por_mes(self.usuario,4,2023)

@@ -1,9 +1,10 @@
 from allauth.socialaccount.views import signup
 from dj_rest_auth.views import PasswordResetView, PasswordResetConfirmView
-from django.urls import path, include
+from django.urls import path
 from django.views.generic import TemplateView
-from .views import UserUpdateView
+
 from .views import GoogleLogin
+from .views import UserUpdateView
 
 urlpatterns = [
     # TODO: Add user editing url

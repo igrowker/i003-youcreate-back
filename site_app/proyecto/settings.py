@@ -1,29 +1,35 @@
 import os
-from pathlib import Path
-from dotenv import load_dotenv
 from datetime import timedelta
-# from celery.schedules import crontab
+from pathlib import Path
+
+import dj_database_url
+from dotenv import load_dotenv
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 BASE_URL_DEV = "http://localhost:8000/"
 BASE_URL_PRODUCTION = ""
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = "RENDER" not in os.environ
 
 ALLOWED_HOSTS = []
+# Añade el host de Render a "ALLOWED_HOSTS" si existe
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 SITE_ID = 1  # Necessary for allauth
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:4200"
+    "http://localhost:4200",
+    "https://you-create-backend-service.onrender.com",
 ]
 
 INSTALLED_APPS = [
@@ -39,7 +45,7 @@ INSTALLED_APPS = [
     "Ingreso",
     "PagoColaborador",
     "ObligacionFiscal",
-    'ActionLog',
+    "ActionLog",
     "corsheaders",
     "allauth",
     "allauth.account",
@@ -137,10 +143,16 @@ TEMPLATES = [
 WSGI_APPLICATION = "proyecto.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    # DEFAULT para desarrollo
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
+    # }
+    # DEFAULT para producción
+    "default": dj_database_url.config(
+        default="postgresql://postgres:Admin0000@localhost:5432/you_create_db",
+        conn_max_age=600,
+    )
 }
 
 AUTH_USER_MODEL = "Usuario.CustomUser"
@@ -155,6 +167,7 @@ ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # No need to sent POST request to confirmation link
+ACCOUNT_LOGIN_BY_CODE_ENABLED = True
 
 # HEADLESS_ONLY = True
 # HEADLESS_FRONTEND_URLS = {
@@ -165,21 +178,9 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # No need to sent POST request to confirmat
 #     "socialaccount_login_error": "/account/provider/callback",
 # }
 
-# Activa la autenticación multifactor con TOTP
-MFA_SUPPORTED_TYPES = ["totp"]
-MFA_TOTP_PERIOD = 60  # 1 minuto de duración para el código TOTP
-MFA_ADAPTER = "allauth.mfa.adapter.DefaultMFAAdapter"
-MFA_TOTP_ISSUER = "YouCreate"
-# MFA default forms, se pueden cambiar los formularios usados en la autenticación multifactor
-MFA_FORMS = {
-    'authenticate': 'allauth.mfa.base.forms.AuthenticateForm',
-    'reauthenticate': 'allauth.mfa.base.forms.AuthenticateForm',
-    'activate_totp': 'allauth.mfa.totp.forms.ActivateTOTPForm',
-    'deactivate_totp': 'allauth.mfa.totp.forms.DeactivateTOTPForm',
-    'generate_recovery_codes': 'allauth.mfa.recovery_codes.forms.GenerateRecoveryCodesForm',
-}
-
+# URLs
 LOGIN_URL = "auth/login/"
+EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "localhost:4200/home"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -235,14 +236,6 @@ EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-# <PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL>/<uidb64>/<token>/
-PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = (
-    "http://localhost:8000/password-reset/confirm/"
-)
-
-ACCOUNT_EMAIL_VERIFICATION_SENT_REDIRECT_URL = (
-    "auth/registration/email-verification/sent/"
-)
 
 # Social auth
 SOCIALACCOUNT_PROVIDERS = {
