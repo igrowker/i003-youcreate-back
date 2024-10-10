@@ -38,10 +38,10 @@ class CustomConfirmEmailView(ConfirmEmailView):
             confirmation = EmailConfirmationHMAC.from_key(key)
             confirmation.confirm(request)
             # Redirect to the Angular login page with a success message
-            return HttpResponseRedirect(f"{FRONTEND_URL}?email_confirmed=true")
+            return HttpResponseRedirect(f"{FRONTEND_URL}")
         except EmailConfirmation.DoesNotExist:
             # Handle error and redirect to an error page or frontend login with error message
-            return HttpResponseRedirect(f"{FRONTEND_URL}?email_confirmed=false")
+            return HttpResponseRedirect(f"{FRONTEND_URL}")
 
 
 class AccountDataView(APIView):
