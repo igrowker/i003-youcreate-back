@@ -16,7 +16,6 @@ class FiscalStrategyFactory:
         Retorna:
         - Una instancia de una estrategia fiscal específica (ArgentinaFiscalStrategy, EspañaFiscalStrategy, etc.).
         """
-
         # Obtiene el país de residencia del usuario y lo convierte a minúsculas
         pais = usuario.pais_residencia.lower()
 

@@ -1,10 +1,34 @@
-from rest_framework.views import APIView #Para crear vistas basadas en clases y definir metodos HTTP
-from rest_framework.response import Response #Extiende la clase HttpResponde y facilita el trabajo con APIs en formato JSON 
-from .service import IngresosService
-from .serializers import IngresoPorAnioSerializer
 from calendar import month_name
+
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework import status 
+from rest_framework.views import APIView  # Para crear vistas basadas en clases y definir metodos HTTP
+
+from .serializers import IngresoPorAnioSerializer
+from .service import IngresosService
+
+
+class CrearIngresoView(APIView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.ingresos_service = IngresosService()
+    def post(self, request):
+        usuario_id = request.data.get('usuario_id')
+        monto = request.data.get('monto')
+        origen = request.data.get('origen')
+        fecha = request.data.get('fecha', None)  # Opcional
+        
+        # Llamar al servicio para crear el ingreso
+        ingreso = self.ingresos_service.crear_ingreso(usuario_id, monto, origen, fecha)
+        
+        # Devolver la respuesta
+        return Response({
+            'id': ingreso.id,
+            'monto': ingreso.monto,
+            'origen': ingreso.origen,
+            'fecha': ingreso.fecha,
+            'usuario_id': ingreso.usuario_id.id
+        }, status=status.HTTP_201_CREATED)
 
 class IngresosView(APIView):
     def __init__(self, **kwargs):
@@ -15,7 +39,8 @@ class IngresosView(APIView):
         ingresos = self.ingresos_service.obtener_ingresos_usuario(usuario_id)
         
         if not ingresos:
-            return Response([], status=status.HTTP_204_NO_CONTENT)  # O el estado que prefieras
+            return Response({'message': 'No se encontraron ingresos para el usuario'}, status=status.HTTP_200_OK)
+
 
         # Convertir los resultados a una lista de diccionarios para la respuesta
         data = [

@@ -5,10 +5,9 @@ from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueValidator
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate  # 2fa
+
 from .utils import verify_otp  # 2fa
-
 from proyecto import settings
-
 from .auth_backend import CustomPasswordValidator
 from .models import CustomUser
 
@@ -35,8 +34,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     pais_residencia = serializers.CharField(required=True)
     redes_sociales = serializers.JSONField(required=False, allow_null=True)
     telefono = serializers.CharField(required=False, allow_blank=True)
-    numero_fiscal = serializers.CharField(
-        required=False, allow_blank=True, allow_null=True)
+    numero_fiscal = serializers.CharField(required=False)
 
     def get_cleaned_data(self):
         return {
@@ -69,6 +67,8 @@ class CustomRegisterSerializer(RegisterSerializer):
         user.redes_sociales = self.validated_data.get("redes_sociales")
         user.telefono = self.validated_data.get("telefono")
         user.numero_fiscal = self.validated_data.get("numero_fiscal")
+        if not user.numero_fiscal:
+            user.numero_fiscal = ""
         # TODO: Hash user sensitive data --> numero_fiscal, redes_sociales, telefonos?
 
         user.set_password(self.validated_data["password1"])
@@ -157,6 +157,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
+    """
+    El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
+    """
     class Meta:
         model = CustomUser
         fields = ['nombre', 'apellido', 'telefono',
@@ -168,11 +171,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         if CustomUser.objects.exclude(id=user.id).filter(email=value).exists():
             raise serializers.ValidationError("Este correo ya está en uso.")
         return value
-
-
-"""
-El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
-"""
 
 
 class TwoFALoginSerializer(serializers.Serializer):

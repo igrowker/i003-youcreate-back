@@ -6,15 +6,17 @@ from django.dispatch import receiver
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth import login
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
 from .utils import send_otp_via_email, verify_otp
 from .models import CustomUser
 from .serializers import CustomTokenObtainPairSerializer, UserUpdateSerializer
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import login 
-from .serializers import TwoFALoginSerializer 
+from .serializers import TwoFALoginSerializer
 
 
 from proyecto.settings import BASE_URL_DEV
+from .serializers import UserUpdateSerializer
 
 
 class GoogleLogin(SocialLoginView):
