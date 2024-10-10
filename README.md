@@ -1,7 +1,3 @@
-
-
-
-
 # **YouCreate**
 ================
 
@@ -9,6 +5,7 @@
 ---------------------------
 
 YouCreate es un proyecto de aplicación web diseñado para permitir a los usuarios crear y gestionar contenido de manera fácil y segura.
+
 
 ## Requisitos Previos
 ----------------------
@@ -25,11 +22,13 @@ YouCreate es un proyecto de aplicación web diseñado para permitir a los usuari
 3. Instala las dependencias: `pip install -r requirements.txt`
 4. Configura la base de datos: `python manage.py migrate`
 
+
 ## Ejecución local
 -------------
 
 1. Ejecuta el servidor de desarrollo: `python manage.py runserver`
 2. Accede a la aplicación en `http://localhost:8000`
+
 
 ## Estructura del Proyecto
 ---------------------------
@@ -63,5 +62,3 @@ Si deseas contribuir al proyecto, por favor sigue los siguientes pasos:
 
 ## Licencia
 ------------
-
-Este proyecto se encuentra bajo la licencia [especificar licencia].

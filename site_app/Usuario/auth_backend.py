@@ -1,8 +1,8 @@
 import re
 
-from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomPasswordValidator(serializers.ModelSerializer):
@@ -32,4 +32,3 @@ class CustomPasswordValidator(serializers.ModelSerializer):
         return _(
             "La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número."
         )
-

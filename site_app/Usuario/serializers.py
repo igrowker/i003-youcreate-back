@@ -1,10 +1,12 @@
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer
-from django.utils.translation import gettext_lazy as _
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import authenticate  # 2fa
 
+from .utils import verify_otp  # 2fa
 from proyecto import settings
 from .auth_backend import CustomPasswordValidator
 from .models import CustomUser
@@ -153,10 +155,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["role"] = usuario.role
         return token
 
+
 class UserUpdateSerializer(serializers.ModelSerializer):
+    """
+    El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
+    """
     class Meta:
         model = CustomUser
-        fields = ['nombre', 'apellido', 'telefono', 'email', 'pais_residencia', 'redes_sociales']
+        fields = ['nombre', 'apellido', 'telefono',
+                  'email', 'pais_residencia', 'redes_sociales']
 
     # Validación para asegurar que el correo sea único (si es necesario cambiar el correo)
     def validate_email(self, value):
@@ -164,6 +171,32 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         if CustomUser.objects.exclude(id=user.id).filter(email=value).exists():
             raise serializers.ValidationError("Este correo ya está en uso.")
         return value
-"""
-El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
-"""
+
+
+class TwoFALoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    otp_code = serializers.CharField(write_only=True, required=False)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+        user = authenticate(email=email, password=password)
+
+        if not user:
+            raise exceptions.ValidationError("Credenciales inválidas.")
+
+        if user.is_mfa_enabled:
+            # No enviar el OTP inmediatamente, solo informar que se requiere 2FA
+            if "otp_code" not in attrs:
+                return {
+                    "user": user,
+                    "mfa_required": True
+                }
+
+            otp_code = attrs["otp_code"]
+            if not verify_otp(user, otp_code):
+                raise exceptions.ValidationError("Código OTP inválido.")
+
+        attrs['user'] = user
+        return attrs
