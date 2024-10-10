@@ -33,31 +33,11 @@ class TestPagoColaboradorViews(TestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
 
-    def test_lista_pagos(self):
-        PagoColaborador.objects.create(
-            colaborador_id=self.colaborador,
-            monto=2000.00,  
-            fecha_pago=date.today(),
-            descripcion='Pago Test 1',
-            metodo_pago='Transferencia'  
-        )
-        PagoColaborador.objects.create(
-            colaborador_id=self.colaborador,
-            monto=1500.00,
-            fecha_pago=date.today(),
-            descripcion='Pago Test 2',
-            metodo_pago='Efectivo'  
-        )
-        
-        response = self.client.get(reverse('pagocolaborador-list'))
-        self.assertEqual(response.status_code, 200)
-        
-        self.assertContains(response, "Pago Test 1")
-        self.assertContains(response, "Pago Test 2")
-
-    def test_crear_pago_view(self):
+    def test_crear_pago(self):
         response = self.client.post(reverse('pagocolaborador-list'), {
-            'colaborador_id': self.colaborador.id,  
+            'colaborador_id': self.colaborador.id, 
+            'nombre': 'Juan Carlos',
+            'apellido': 'Lopez', 
             'monto': 2000.00,
             'fecha_pago': date.today().strftime('%Y-%m-%d'),  
             'descripcion': 'Pago Test',
@@ -65,21 +45,49 @@ class TestPagoColaboradorViews(TestCase):
         })
 
         self.assertEqual(response.status_code, 201)
-
         self.assertEqual(PagoColaborador.objects.count(), 1)
         self.assertEqual(PagoColaborador.objects.first().descripcion, 'Pago Test')
-        self.assertEqual(PagoColaborador.objects.first().metodo_pago, 'Transferencia')  
+
+    def test_lista_pagos(self):
+        PagoColaborador.objects.create(
+            colaborador_id=self.colaborador,
+            nombre='Juan Carlos',
+            apellido='Lopez',
+            monto=2000.00,  
+            fecha_pago=date.today(),
+            descripcion='Pago Test 1',
+            metodo_pago='Transferencia'  
+        )
+        PagoColaborador.objects.create(
+            colaborador_id=self.colaborador,
+            nombre='Franco',
+            apellido='Pérez',            
+            monto=1500.00,
+            fecha_pago=date.today(),
+            descripcion='Pago Test 2',
+            metodo_pago='Efectivo'  
+        )
+        
+        response = self.client.get(reverse('pagocolaborador-list'))
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pago Test 1")
+        self.assertContains(response, "Pago Test 2")
 
     def test_actualizar_pago(self):
         pago = PagoColaborador.objects.create(
             colaborador_id=self.colaborador,
+            nombre='Alejandro',
+            apellido='Felix',
             monto=2000.00,  
             fecha_pago=date.today(),
             descripcion='Pago Test',
-            metodo_pago='Efectivo' 
+            metodo_pago='Efectivo'
         )
 
         response = self.client.patch(reverse('pagocolaborador-detail', args=[pago.id]), {
+            'nombre': 'Nuevo Nombre',
+            'apellido': 'Nuevo Apellido',
             'monto': 2500.00,
             'descripcion': 'Pago Actualizado',
             'metodo_pago': 'Transferencia'  
@@ -87,12 +95,27 @@ class TestPagoColaboradorViews(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        self.assertContains(response, 'Pago Actualizado')
-
-        pago.refresh_from_db() 
+        pago.refresh_from_db()
+        self.assertEqual(pago.nombre, 'Nuevo Nombre')
+        self.assertEqual(pago.apellido, 'Nuevo Apellido')
         self.assertEqual(pago.monto, 2500.00)
         self.assertEqual(pago.descripcion, 'Pago Actualizado')
-        self.assertEqual(pago.metodo_pago, 'Transferencia')  
+        self.assertEqual(pago.metodo_pago, 'Transferencia')
+
+    def test_eliminar_pago(self):
+        pago = PagoColaborador.objects.create(
+            colaborador_id=self.colaborador,
+            nombre='Alejandro',
+            apellido='Felix',
+            monto=2000.00,  
+            fecha_pago=date.today(),
+            descripcion='Pago Test',
+            metodo_pago='Efectivo'
+        )
+
+        response = self.client.delete(reverse('pagocolaborador-detail', args=[pago.id]))
+        self.assertEqual(response.status_code, 204)  
+        self.assertEqual(PagoColaborador.objects.count(), 0)
 
     def tearDown(self):
         PagoColaborador.objects.filter(colaborador_id=self.colaborador).delete()
