@@ -30,6 +30,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:4200",
     "https://you-create-backend-service.onrender.com",
+    "https://igrowker-youcreate.firebaseapp.com",
+    "https://igrowker-youcreate.web.app",
 ]
 
 INSTALLED_APPS = [

@@ -87,7 +87,7 @@ class TwoFALoginView(APIView):
             send_otp_via_email(user)
             return Response(
                 {"detail": "2FA requerido. Se ha enviado un código a tu correo."},
-                status=status.HTTP_200_OK,
+                status=status.HTTP_202_ACCEPTED,
             )
 
         # Si no se requiere 2FA, generar el token directamente
