@@ -6,11 +6,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("auth/", include("Usuario.urls")),
     path("auth/", include("dj_rest_auth.urls")),
-    re_path(
-        "^auth/registration/account-confirm-email/(?P<key>[-:\w]+)/$",
-        ConfirmEmailView.as_view(),
-        name="account_confirm_email",
-    ),
+    re_path("^auth/registration/account-confirm-email/(?P<key>[-:\w]+)/$",ConfirmEmailView.as_view(),name="account_confirm_email",),
     path("auth/registration/", include("dj_rest_auth.registration.urls")),
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),

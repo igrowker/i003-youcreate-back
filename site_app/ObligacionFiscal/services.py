@@ -1,6 +1,7 @@
 from .fiscal_strategies.argentina_strategy import ArgentinaFiscalStrategy
 from .repositories import ObligacionesFiscalesRepository
 
+
 class ObligacionesFiscalesService:
     """Servicio para manejar las obligaciones fiscales según el país del usuario."""
 
@@ -11,13 +12,26 @@ class ObligacionesFiscalesService:
 
     def _elegir_estrategia_fiscal(self):
         """Selecciona la estrategia fiscal según el país del usuario."""
-        if self.pais == "argentina":
+        pais = self.usuario.pais_residencia.lower(
+        )  # Obtiene el país de residencia del usuario y lo convierte a minúsculas
+        # Mapeo de códigos de país a nombres completos
+        pais_mapping = {
+            'ar': 'argentina',
+            'es': 'españa',
+            # Agrega más códigos y nombres según sea necesario
+        }
+        # Si el país es un código, lo convierte al nombre completo
+        # Convierte el código al nombre completo
+        pais = pais_mapping.get(pais, pais)
+
+        if pais == "argentina":
             return ArgentinaFiscalStrategy(self.usuario)
         # Aquí podrías agregar otras estrategias para otros países, ejemplo:
         # elif self.pais == "mexico":
         #     return MexicoFiscalStrategy(self.usuario)
         else:
-            raise ValueError(f"No hay estrategia fiscal disponible para el país: {self.pais}")
+            raise ValueError(
+                f"No hay estrategia fiscal disponible para el país: {pais}")
 
     def manejar_obligaciones(self):
         """Maneja el cálculo y almacenamiento de las obligaciones fiscales."""
