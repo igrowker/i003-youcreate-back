@@ -8,26 +8,30 @@ from .models import ObligacionFiscal
 
 # Tarea compartida para Celery
 
+
 def enviar_notificacion_vencimiento():
     hoy = timezone.now().date()
     fecha_inicio = hoy
-    fecha_limite = hoy + timedelta(days=5) # Notificar 5 días antes del vencimiento
-    
+    fecha_limite = hoy + timedelta(days=5)  # Notificar 5 días antes del vencimiento
+
     # Filtrar obligaciones que vencen pronto, no han sido pagadas, y no se notificaron hoy
     obligaciones = ObligacionFiscal.objects.filter(
         fecha_vencimiento__range=(fecha_inicio, fecha_limite),
         estado_pago=False,
-        email_automatico=True
+        email_automatico=True,
     ).exclude(fecha_notificacion=hoy)  # Excluir las que ya fueron notificadas hoy
 
     for obligacion in obligaciones:
         usuario = obligacion.usuario
-        print(f"Enviando correo a {usuario.email} por obligación : {obligacion.tipo_impuesto}")
+        print(
+            f"Enviando correo a {usuario.email} por obligación : {obligacion.tipo_impuesto}"
+        )
         enviar_correo_vencimiento(usuario.email, obligacion)
 
         # Actualizar la fecha de notificación a hoy
         obligacion.fecha_notificacion = hoy
         obligacion.save()
+
 
 # Función para enviar el correo
 def enviar_correo_vencimiento(correo, obligacion):
@@ -42,8 +46,7 @@ def enviar_correo_vencimiento(correo, obligacion):
         Atentamente,\n
         YOUCREATE
         """
-        send_mail(asunto, mensaje, 'igrowker.you.create@gmail.com', [correo])
+        send_mail(asunto, mensaje, "igrowker.you.create@gmail.com", [correo])
         print(f"Correo enviado a {correo}")
     except Exception as e:
         print(f"Error al enviar correo a {correo}: {str(e)}")
-

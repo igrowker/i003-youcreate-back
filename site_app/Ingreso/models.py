@@ -10,3 +10,5 @@ class Ingreso(models.Model):
     origen = models.CharField(max_length=255)
     fecha = models.DateField()
     usuario_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    categoria = models.CharField(max_length=100)
+    descripcion = models.CharField(max_length=255)

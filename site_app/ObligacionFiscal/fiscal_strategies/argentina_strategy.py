@@ -26,8 +26,15 @@ class ArgentinaFiscalStrategy(ObligacionesFiscalesStrategy):
             usuario
         )  # Asocia un repositorio para el manejo de obligaciones fiscales del usuario
 
-    def calcular_obligaciones(self, monotributo=False):
+    def calcular_obligaciones(self, monotributo=None):
         """Calcula y guarda las obligaciones fiscales del usuario según si es monotributista o no."""
+
+        # Verifica si el usuario es monotributista basado en el argumento monotributo o en el perfil del usuario
+        if monotributo is not None:
+            es_monotributista = monotributo
+        else:
+            es_monotributista = self.usuario.monotributo
+
         ingresos_mensuales = (
             self.obtener_ingresos_mensuales()
         )  # Calcula los ingresos mensuales promedio del usuario
@@ -35,11 +42,6 @@ class ArgentinaFiscalStrategy(ObligacionesFiscalesStrategy):
             self.contar_meses_registrados()
         )  # Cuenta cuántos meses del año se han registrado ingresos
 
-        # Verifica si el usuario es monotributista basado en el argumento monotributo o en el perfil del usuario
-        if monotributo is not None:
-            es_monotributista = monotributo
-        else:
-            es_monotributista = self.usuario.monotributo
 
         if es_monotributista:
             # Si el usuario es monotributista y tiene meses registrados con ingresos, calcula sus obligaciones de monotributo

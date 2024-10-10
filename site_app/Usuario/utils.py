@@ -1,13 +1,13 @@
-from django.core.mail import send_mail
 import pyotp
+from django.core.mail import send_mail
 
 
 def send_otp_via_email(user):
     otp_code = user.get_otp_code()  # Obtener el código OTP
     send_mail(
-        'Tu código OTP',
-        f'Tu código de verificación es {otp_code}',
-        'igrowker.you.create@gmail.com',
+        "Tu código OTP",
+        f"Tu código de verificación es {otp_code}",
+        "igrowker.you.create@gmail.com",
         [user.email],
         fail_silently=False,  # No mostrar error si no se envía el correo
     )

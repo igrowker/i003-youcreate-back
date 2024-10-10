@@ -63,10 +63,10 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",#"rest_framework.permissions.IsAuthenticated"
-        #se cambio a alowany para que el 2fa pueda acceder al enpoint sin necesitar del token, manejar la autentificacion directamente en las vistas que nececitan proteccion
-        #ejemplo:
-        #permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
+        "rest_framework.permissions.AllowAny",  # "rest_framework.permissions.IsAuthenticated"
+        # se cambio a alowany para que el 2fa pueda acceder al enpoint sin necesitar del token, manejar la autentificacion directamente en las vistas que nececitan proteccion
+        # ejemplo:
+        # permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -220,8 +220,8 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
-if not DEBUG:    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+if not DEBUG:  # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
     # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
     # and renames the files with unique names for each version to support long-term caching
     # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
