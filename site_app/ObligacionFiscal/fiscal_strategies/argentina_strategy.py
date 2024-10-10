@@ -42,7 +42,6 @@ class ArgentinaFiscalStrategy(ObligacionesFiscalesStrategy):
             self.contar_meses_registrados()
         )  # Cuenta cuántos meses del año se han registrado ingresos
 
-
         if es_monotributista:
             # Si el usuario es monotributista y tiene meses registrados con ingresos, calcula sus obligaciones de monotributo
             if meses_registrados > 0:

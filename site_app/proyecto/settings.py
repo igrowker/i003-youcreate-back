@@ -183,7 +183,7 @@ ACCOUNT_LOGIN_BY_CODE_ENABLED = True
 
 # URLs
 LOGIN_URL = "auth/login/"
-EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "localhost:4200/home"
+FRONTEND_URL = "http://localhost:4200/auth/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
     {

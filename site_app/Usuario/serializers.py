@@ -180,6 +180,45 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         return value
 
 
+class UserDataSerializer(serializers.ModelSerializer):
+    """
+    El serializador recoge los datos del usuario para mostrarlos en el perfil.
+    Retorna el nombre completo como un campo extra.
+    """
+
+    nombre_completo = serializers.CharField(read_only=True)
+
+    def get_user_data(self):
+        user = self.context["request"].user
+        return {
+            "nombre": user.nombre,
+            "apellido": user.apellido,
+            "nombre_completo": self.get_full_name(user),
+            "email": user.email,
+            "pais_residencia": user.pais_residencia,
+            "redes_sociales": user.redes_sociales,
+            "telefono": user.telefono,
+            "numero_fiscal": user.numero_fiscal or "",
+        }
+
+    def get_full_name(self, user):
+        full_name = "%s %s" % (user.nombre, user.apellido)
+        return full_name.strip()
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "nombre",
+            "apellido",
+            "nombre_completo",
+            "email",
+            "pais_residencia",
+            "redes_sociales",
+            "telefono",
+            "numero_fiscal",
+        ]
+
+
 class TwoFALoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
