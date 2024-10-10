@@ -7,6 +7,7 @@ class PagoColaborador(models.Model):
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_pago = models.DateField()
     descripcion = models.TextField(null=True)
+    metodo_pago = models.CharField(max_length=50) 
 
     def __str__(self):
-        return f"{self.colaborador_id} - {self.fecha_pago} - {self.monto}"
+        return f"{self.colaborador_id} - {self.colaborador_id.nombre} - {self.fecha_pago} - {self.monto} - {self.metodo_pago}"

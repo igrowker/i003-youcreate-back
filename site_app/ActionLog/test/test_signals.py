@@ -14,8 +14,11 @@ class UserActionLogTests(TestCase):
             correo='test@example.com',
             telefono='123456789',
             redes_sociales='twitter',
-            pais_residencia='Argentina'
+            pais_residencia='Argentina',
+            numero_fiscal='12345678',
+            monotributo='Monotributo Test'
         )
+
     def test_update_user_nombre_action_log(self):
         self.user.nombre = 'UpdatedName'
         self.user.save()  
@@ -48,6 +51,24 @@ class UserActionLogTests(TestCase):
 
     def test_update_user_pais_residencia_action_log(self):
         self.user.pais_residencia = 'Brasil'
+        self.user.save()
+        action_log = ActionLog.objects.last()
+        self.assertEqual(action_log.action, 'User Updated')
+
+    def test_update_user_password_action_log(self):
+        self.user.set_password('newtestpass')  
+        self.user.save()
+        action_log = ActionLog.objects.last()
+        self.assertEqual(action_log.action, 'User Updated')
+
+    def test_update_user_numero_fiscal_action_log(self):
+        self.user.numero_fiscal = '87654321'
+        self.user.save()
+        action_log = ActionLog.objects.last()
+        self.assertEqual(action_log.action, 'User Updated')
+
+    def test_update_user_monotributo_action_log(self):
+        self.user.monotributo = 'Updated Monotributo'
         self.user.save()
         action_log = ActionLog.objects.last()
         self.assertEqual(action_log.action, 'User Updated')

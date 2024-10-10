@@ -37,13 +37,15 @@ class TestPagoColaboradorViews(TestCase):
             colaborador_id=self.colaborador,
             monto=2000.00,  
             fecha_pago=date.today(),
-            descripcion='Pago Test 1'
+            descripcion='Pago Test 1',
+            metodo_pago='Transferencia'  
         )
         PagoColaborador.objects.create(
             colaborador_id=self.colaborador,
             monto=1500.00,
             fecha_pago=date.today(),
-            descripcion='Pago Test 2'
+            descripcion='Pago Test 2',
+            metodo_pago='Efectivo'  
         )
         
         response = self.client.get(reverse('pagocolaborador-list'))
@@ -58,24 +60,28 @@ class TestPagoColaboradorViews(TestCase):
             'monto': 2000.00,
             'fecha_pago': date.today().strftime('%Y-%m-%d'),  
             'descripcion': 'Pago Test',
+            'metodo_pago': 'Transferencia'
         })
 
         self.assertEqual(response.status_code, 201)
 
         self.assertEqual(PagoColaborador.objects.count(), 1)
         self.assertEqual(PagoColaborador.objects.first().descripcion, 'Pago Test')
+        self.assertEqual(PagoColaborador.objects.first().metodo_pago, 'Transferencia')  
 
     def test_actualizar_pago(self):
         pago = PagoColaborador.objects.create(
             colaborador_id=self.colaborador,
             monto=2000.00,  
             fecha_pago=date.today(),
-            descripcion='Pago Test'
+            descripcion='Pago Test',
+            metodo_pago='Efectivo' 
         )
 
         response = self.client.patch(reverse('pagocolaborador-detail', args=[pago.id]), {
             'monto': 2500.00,
-            'descripcion': 'Pago Actualizado'
+            'descripcion': 'Pago Actualizado',
+            'metodo_pago': 'Transferencia'  
         })
 
         self.assertEqual(response.status_code, 200)
@@ -85,6 +91,7 @@ class TestPagoColaboradorViews(TestCase):
         pago.refresh_from_db() 
         self.assertEqual(pago.monto, 2500.00)
         self.assertEqual(pago.descripcion, 'Pago Actualizado')
+        self.assertEqual(pago.metodo_pago, 'Transferencia')  
 
     def tearDown(self):
         PagoColaborador.objects.filter(colaborador_id=self.colaborador).delete()

@@ -60,8 +60,24 @@ def user_action_log(sender, instance, created, **kwargs):
                 'old_value': old_instance.redes_sociales,
                 'new_value': instance.redes_sociales
             })
-        # TODO: Add field for "numero_fiscal"
-
+        if instance.password != old_instance.password:
+            changes.append({
+                'field': 'password',
+                'old_value': '****',  
+                'new_value': '****'
+            })
+        if old_instance and old_instance.numero_fiscal != instance.numero_fiscal:
+            changes.append({
+                'field': 'numero_fiscal',
+                'old_value': old_instance.numero_fiscal,
+                'new_value': instance.numero_fiscal
+            })
+        if old_instance and old_instance.monotributo != instance.monotributo:
+            changes.append({
+                'field': 'monotributo',
+                'old_value': old_instance.monotributo,
+                'new_value': instance.monotributo
+            })
         if changes:
             details = "; ".join([f"Campo '{change['field']}' cambiado de '{change['old_value']}' a '{change['new_value']}'"
                                  for change in changes])

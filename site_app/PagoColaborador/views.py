@@ -23,19 +23,18 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
         monto = data.get('monto')
         fecha_pago = data.get('fecha_pago')
         descripcion = data.get('descripcion')
-
+        metodo_pago = data.get('metodo_pago')  
         try:
             colaborador = Colaborador.objects.get(id=colaborador_id)
         except Colaborador.DoesNotExist:
             return Response({"detail": "Colaborador no encontrado."}, status=404)
-
         try:
-            pago = PagosColaboradoresService.registrar_pago(colaborador_id, monto, fecha_pago, descripcion)
+            pago = PagosColaboradoresService.registrar_pago(colaborador_id, monto, fecha_pago, descripcion, metodo_pago)
             serializer = self.get_serializer(pago)
             return Response(serializer.data, status=201)
         except Exception as e:
             return Response({"detail": str(e)}, status=400)
-
+            
     def list(self, request, *args, **kwargs):
         pagos = self.get_queryset()  
 
@@ -58,4 +57,3 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
-
