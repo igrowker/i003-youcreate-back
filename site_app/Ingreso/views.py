@@ -1,12 +1,10 @@
-from calendar import month_name
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import (
     APIView,
 )  # Para crear vistas basadas en clases y definir metodos HTTP
 
-from .serializers import IngresoPorAnioSerializer
+from .serializers import IngresoSerializer
 from .service import IngresosService
 
 
@@ -44,20 +42,14 @@ class IngresosView(APIView):
 
     def get(self, request, usuario_id):
         ingresos = self.ingresos_service.obtener_ingresos_usuario(usuario_id)
-
         if not ingresos:
             return Response(
                 {"message": "No se encontraron ingresos para el usuario"},
                 status=status.HTTP_200_OK,
             )
-
-        # Convertir los resultados a una lista de diccionarios para la respuesta
-        data = [
-            {"origen": ingreso["origen"], "total": ingreso["total"]}
-            for ingreso in ingresos
-        ]
-
-        return Response(data)
+        # Convierto los objetos Ingreso a JSON
+        serializer = IngresoSerializer(ingresos, many=True)
+        return Response(serializer.data)
 
 
 class IngresosTotalesView(APIView):
@@ -69,6 +61,11 @@ class IngresosTotalesView(APIView):
         # Llamamos al servicio para obtener los ingresos totales
         ingresos_totales = self.ingresos_service.obtener_ingresos_totales(usuario_id)
         # Retorno el resultado ya en formato compatible con JSON (dicc)
+        if not ingresos_totales:
+            return Response(
+                {"message": "No se encontraron ingresos para el usuario"},
+                status=status.HTTP_200_OK,
+            )
         return Response(ingresos_totales)
 
 
@@ -79,17 +76,16 @@ class IngresosPorMesView(APIView):
 
     def get(self, request, usuario_id, mes):
         # Llamamos al servicio para obtener los ingresos por mes
-        ingresos_por_mes = self.ingresos_service.obtener_ingresos_por_mes(
+        ingresos_por_mes = self.ingresos_service.obtener_ingresos_de_un_mes(
             usuario_id, mes
         )
-        # Convertimos el número del mes a su nombre
-        mes_nombre = month_name[mes]  # 'Enero' para 1, 'Febrero' para 2, etc.
-        # Creamos un conjunto de datos para la respuesta
-        total_ingresos = sum(ingreso.monto for ingreso in ingresos_por_mes)
-        # Estructuramos los datos para la respuesta JSON
-        response_data = [{"mes": mes_nombre, "total": total_ingresos}]
-        # Retornamos los datos en formato JSON
-        return Response(response_data)
+        if not ingresos_por_mes:
+            return Response(
+                {"message": "No se encontraron ingresos para el usuario"},
+                status=status.HTTP_200_OK,
+            )
+        serializer = IngresoSerializer(ingresos_por_mes, many=True)
+        return Response(serializer.data)
 
 
 class IngresosPorAnioView(APIView):
@@ -99,10 +95,57 @@ class IngresosPorAnioView(APIView):
 
     def get(self, request, usuario_id, anio):
         # Llamamos al servicio para obtener los ingresos por anio
-        ingresos_por_anio = self.ingresos_service.obtener_ingresos_por_anio(
+        ingresos_por_anio = self.ingresos_service.obtener_ingresos_de_un_anio(
             usuario_id, anio
         )
-        # Convierto el QuerySet en un conjunto de datos JSON
-        serializer = IngresoPorAnioSerializer(ingresos_por_anio, many=True)
-        # Retorno los datos serializados en formato JSON
+        if not ingresos_por_anio:
+            return Response(
+                {"message": "No se encontraron ingresos para el usuario"},
+                status=status.HTTP_200_OK,
+            )
+        serializer = IngresoSerializer(ingresos_por_anio, many=True)
         return Response(serializer.data)
+
+
+class IngresoTotalPorMes(APIView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.ingresos_service = IngresosService()
+
+    def get(self, request, usuario_id, mes, anio):
+        # Llamamos al servicio para obtener los ingresos totales de un mes
+        ingresos_total = self.ingresos_service.obtener_ingreso_total_en_un_mes(
+            usuario_id, mes, anio
+        )
+        if not ingresos_total:
+            return Response(
+                {
+                    "message": "No se encontraron ingresos para el usuario en el año indicado"
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        # Retornamos el diccionario directamente
+        return Response(ingresos_total)
+
+
+class IngresoTotalPorAnio(APIView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.ingresos_service = IngresosService()
+
+    def get(self, request, usuario_id, anio):
+        # Llamamos al servicio para obtener los ingresos totales de un anio
+        ingresos_total = self.ingresos_service.obtener_ingreso_total_en_un_anio(
+            usuario_id, anio
+        )
+        if not ingresos_total:
+            return Response(
+                {
+                    "message": "No se encontraron ingresos para el usuario en el año indicado"
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        # Retornamos el diccionario directamente
+        return Response(ingresos_total)

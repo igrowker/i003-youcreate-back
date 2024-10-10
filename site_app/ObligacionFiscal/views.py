@@ -1,4 +1,4 @@
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -7,8 +7,8 @@ from .serializers import ObligacionFiscalSerializer
 
 
 class ObligacionesFiscalesController(APIView):
-    # permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
-    permission_classes = [AllowAny]  # Permitir acceso sin autenticación temporalmente
+    permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
+    # permission_classes = [AllowAny] # Permitir acceso sin autenticación temporalmente
 
     def get(self, request):
         usuario = request.user  # Obtenemos el usuario autenticado

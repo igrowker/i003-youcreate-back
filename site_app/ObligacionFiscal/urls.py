@@ -7,10 +7,10 @@ urlpatterns = [
         "obligaciones-fiscales/",
         ObligacionesFiscalesController.as_view(),
         name="obligaciones_fiscales",
-    ),
+    ),  # obligaciones fiscales del mes
     path(
-        "obligaciones-fiscales/<int:id>/",
+        "actualizacion-estados/<int:id>/",
         ObligacionesFiscalesController.as_view(),
-        name="obligacion-fiscal-detail",
-    ),
+        name="actualizacion-estados",
+    ),  # cambio de estados de emeil_automatico y estado_pago
 ]

@@ -1,5 +1,6 @@
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer
+from django.contrib.auth import authenticate  # 2fa
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueValidator
@@ -8,6 +9,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from proyecto import settings
 from .auth_backend import CustomPasswordValidator
 from .models import CustomUser
+from .utils import verify_otp  # 2fa
 
 
 class CustomRegisterSerializer(RegisterSerializer):
@@ -215,3 +217,29 @@ class UserDataSerializer(serializers.ModelSerializer):
             "telefono",
             "numero_fiscal",
         ]
+
+
+class TwoFALoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    otp_code = serializers.CharField(write_only=True, required=False)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+        user = authenticate(email=email, password=password)
+
+        if not user:
+            raise exceptions.ValidationError("Credenciales inválidas.")
+
+        if user.is_mfa_enabled:
+            # No enviar el OTP inmediatamente, solo informar que se requiere 2FA
+            if "otp_code" not in attrs:
+                return {"user": user, "mfa_required": True}
+
+            otp_code = attrs["otp_code"]
+            if not verify_otp(user, otp_code):
+                raise exceptions.ValidationError("Código OTP inválido.")
+
+        attrs["user"] = user
+        return attrs

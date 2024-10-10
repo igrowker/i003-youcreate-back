@@ -63,7 +63,10 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.AllowAny",  # "rest_framework.permissions.IsAuthenticated"
+        # se cambio a alowany para que el 2fa pueda acceder al enpoint sin necesitar del token, manejar la autentificacion directamente en las vistas que nececitan proteccion
+        # ejemplo:
+        # permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",

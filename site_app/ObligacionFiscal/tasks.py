@@ -21,8 +21,6 @@ def enviar_notificacion_vencimiento():
         email_automatico=True,
     ).exclude(fecha_notificacion=hoy)  # Excluir las que ya fueron notificadas hoy
 
-    print(f"Obligaciones por vencer en 3 días: {obligaciones.count()}")
-
     for obligacion in obligaciones:
         usuario = obligacion.usuario
         print(
@@ -40,7 +38,7 @@ def enviar_correo_vencimiento(correo, obligacion):
     try:
         asunto = f"Recordatorio de vencimiento de su obligación fiscal: {obligacion.tipo_impuesto}"
         mensaje = f"""
-        Estimado/a {obligacion.usuario.first_name},\n
+        Estimado/a\n
         Le recordamos que su obligación fiscal correspondiente al impuesto {obligacion.tipo_impuesto}, por un monto de {obligacion.monto_a_pagar}, vence el día {obligacion.fecha_vencimiento}.\n\n
         Para evitar cualquier penalidad, le solicitamos que realice el pago antes de la fecha de vencimiento. Agradecemos su atención a este asunto.\n\n
         Si ya ha realizado el pago, por favor ignore este mensaje.\n\n
