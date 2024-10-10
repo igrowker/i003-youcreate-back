@@ -9,16 +9,17 @@ from rest_framework.test import APIClient
 
 class TestPagoColaboradorViews(TestCase):
     def setUp(self):
-        self.usuario = CustomUser.objects.create_user(
-            username="andrec",
-            nombre="André",
-            apellido="Candeloro",
-            correo="acnm8@gmail.com",
-            password="ACNM0000",
-            pais_residencia="AR",
-            redes_sociales={"instagram": "@example"}
+        self.usuario = CustomUser.objects.create(
+            nombre='Juan',
+            apellido='Pérez',
+            email='juan.perez@example.com',
+            telefono='123456789',
+            password='password',  
+            pais_residencia='Argentina',
+            redes_sociales={'facebook': 'facebook.com/juanperez'},
+            numero_fiscal='123456789',
+            monotributo=True
         )
-
         self.colaborador = Colaborador.objects.create(
             nombre="Colaborador Test",
             servicio="Servicio Test",
