@@ -1,4 +1,8 @@
-from abc import ABC, abstractmethod  # Importa herramientas para definir clases abstractas
+from abc import (
+    ABC,
+    abstractmethod,
+)  # Importa herramientas para definir clases abstractas
+
 
 class ObligacionesFiscalesStrategy(ABC):
     """
