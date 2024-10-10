@@ -26,8 +26,8 @@ class FiscalStrategyFactory:
 
         # Mapeo de códigos de país a nombres completos
         pais_mapping = {
-            'ar': 'argentina',
-            'es': 'españa',
+            "ar": "argentina",
+            "es": "españa",
             # Agrega más códigos y nombres según sea necesario
         }
 
@@ -35,7 +35,7 @@ class FiscalStrategyFactory:
         pais = usuario.pais_residencia.lower()
 
         # Si el país es un código, lo convierte al nombre completo
-        pais = pais_mapping.get(pais, pais)# Convierte el código al nombre completo
+        pais = pais_mapping.get(pais, pais)  # Convierte el código al nombre completo
 
         # Selecciona la estrategia fiscal según el país
         if pais == "argentina":

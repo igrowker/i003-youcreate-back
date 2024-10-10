@@ -23,8 +23,8 @@ class CustomUser(AbstractUser):
     monotributo = models.BooleanField(default=False)
 
     # Crea los campos adicionales usados para la autenticación con OTP/MFA
-    # is_mfa_enabled = models.BooleanField(default=False)
-    # otp_secret = models.CharField(max_length=16, blank=True, null=True)
+    is_mfa_enabled = models.BooleanField(default=True)
+    otp_secret = models.CharField(max_length=16, blank=True, null=True)
 
     # Añade un campo para el rol del usuario
     role = models.CharField(

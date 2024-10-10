@@ -153,17 +153,65 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["role"] = usuario.role
         return token
 
+
 class UserUpdateSerializer(serializers.ModelSerializer):
+    """
+    El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
+    """
+
     class Meta:
         model = CustomUser
-        fields = ['nombre', 'apellido', 'telefono', 'email', 'pais_residencia', 'redes_sociales']
+        fields = [
+            "nombre",
+            "apellido",
+            "telefono",
+            "email",
+            "pais_residencia",
+            "redes_sociales",
+        ]
 
     # Validación para asegurar que el correo sea único (si es necesario cambiar el correo)
     def validate_email(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if CustomUser.objects.exclude(id=user.id).filter(email=value).exists():
             raise serializers.ValidationError("Este correo ya está en uso.")
         return value
-"""
-El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
-"""
+
+
+class UserDataSerializer(serializers.ModelSerializer):
+    """
+    El serializador recoge los datos del usuario para mostrarlos en el perfil.
+    Retorna el nombre completo como un campo extra.
+    """
+
+    nombre_completo = serializers.CharField(read_only=True)
+
+    def get_user_data(self):
+        user = self.context["request"].user
+        return {
+            "nombre": user.nombre,
+            "apellido": user.apellido,
+            "nombre_completo": self.get_full_name(user),
+            "email": user.email,
+            "pais_residencia": user.pais_residencia,
+            "redes_sociales": user.redes_sociales,
+            "telefono": user.telefono,
+            "numero_fiscal": user.numero_fiscal or "",
+        }
+
+    def get_full_name(self, user):
+        full_name = "%s %s" % (user.nombre, user.apellido)
+        return full_name.strip()
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "nombre",
+            "apellido",
+            "nombre_completo",
+            "email",
+            "pais_residencia",
+            "redes_sociales",
+            "telefono",
+            "numero_fiscal",
+        ]
