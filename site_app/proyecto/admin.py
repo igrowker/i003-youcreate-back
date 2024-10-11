@@ -13,7 +13,6 @@ class CustomUserAdmin(UserAdmin):
         "email",
         "telefono",
         "password",
-        "verified",
         "pais_residencia",
         "redes_sociales",
         "is_active",
@@ -38,7 +37,7 @@ class CustomUserAdmin(UserAdmin):
         ),
         (
             "Permissions",
-            {"fields": ("is_staff", "is_superuser", "is_active", "role", "verified")},
+            {"fields": ("is_staff", "is_superuser", "is_active", "role")},
         ),
     )
     add_fieldsets = (
@@ -53,7 +52,7 @@ class CustomUserAdmin(UserAdmin):
         },
     )
 
-    list_filter = ["verified", "is_active", "role"]
+    list_filter = ["is_active", "role"]
 
 
 admin.site.register(CustomUser, CustomUserAdmin)

@@ -1,5 +1,7 @@
 from django.db import models
+
 from Colaborador.models import Colaborador
+
 
 class PagoColaborador(models.Model):
     id = models.AutoField(primary_key=True)

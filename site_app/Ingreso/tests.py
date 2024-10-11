@@ -1,91 +1,127 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
-from django.urls import reverse
-from .models import Ingreso, Usuario  # Asegúrate de importar el modelo Usuario
 from decimal import Decimal
+
+from rest_framework.test import APITestCase
+
+from .models import CustomUser
+from .service import IngresosService
+
 
 class IngresosControllerTests(APITestCase):
     def setUp(self):
         # Crea un usuario para las pruebas (usa el campo correcto aquí)
-        self.usuario = Usuario.objects.create(
-            nombre='Test User', 
-            correo='testuser@example.com', 
-            password='testpassword', 
-            pais_residencia='Argentina'
+        self.usuario = CustomUser.objects.create(
+            nombre="Juan",
+            apellido="Pérez",
+            email="juan.perez@example.com",
+            telefono="123456789",
+            password="password",  # Asegúrate de manejar el hash de la contraseña si es necesario
+            pais_residencia="Argentina",
+            redes_sociales={"facebook": "facebook.com/juanperez"},
+            numero_fiscal="123456789",
+            monotributo=True,
         )
-        
+        # Instancia de IngresosService
+        self.servicio_ingreso = IngresosService()
+
         # Crea algunos ingresos para el usuario
-        self.ingreso1 = Ingreso.objects.create(
-            monto=Decimal('100'), 
-            origen='Trabajo', 
-            fecha='2024-09-01', 
-            usuario_id=self.usuario
+        self.ingreso1 = self.servicio_ingreso.crear_ingreso(
+            monto=Decimal("100"),
+            origen="Trabajo",
+            fecha="2024-04-01",
+            usuario_id=self.usuario,
         )
-        self.ingreso2 = Ingreso.objects.create(
-            monto=Decimal('150'), 
-            origen='Inversiones', 
-            fecha='2024-04-05', 
-            usuario_id=self.usuario
+        self.ingreso2 = self.servicio_ingreso.crear_ingreso(
+            monto=Decimal("150"),
+            origen="Inversiones",
+            fecha="2023-04-05",
+            usuario_id=self.usuario,
         )
-        self.ingreso3 = Ingreso.objects.create(
-            monto=Decimal('50'), 
-            origen='Trabajo', 
-            fecha='2023-09-10', 
-            usuario_id=self.usuario
+
+        self.ingreso3 = self.servicio_ingreso.crear_ingreso(
+            monto=Decimal("150"),
+            origen="Youtube",
+            fecha="2024-07-05",
+            usuario_id=self.usuario,
         )
+
+        self.ingreso4 = self.servicio_ingreso.crear_ingreso(
+            monto=Decimal("150"),
+            origen="Colaborador",
+            fecha="2024-04-05",
+            usuario_id=self.usuario,
+        )
+
+    def test_crear_ingreso(self):
+        self.ingreso = self.servicio_ingreso.crear_ingreso(
+            usuario_id=self.usuario, monto=2000, fecha="2023-10-20", origen="Prueba"
+        )
+        ingreso_usuario = self.servicio_ingreso.obtener_ingreso_usuario(
+            self.usuario, self.ingreso.id
+        )
+        self.assertEqual(ingreso_usuario.monto, 2000)
+        self.assertEqual(ingreso_usuario.origen, "Prueba")
 
     def test_obtener_ingresos_usuario(self):
-        # Define la URL usando el ID del usuario
-        url = reverse('ingresos-usuario', args=[self.usuario.id])
-    
-        # Realiza la solicitud GET
-        response = self.client.get(url)
-        
-        # Verifica que la respuesta sea correcta
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
-        # Verifica que los datos devueltos sean correctos
-        expected_data = [
-            {'origen': 'Trabajo', 'monto': '150'},  # Total para "Trabajo"
-            {'origen': 'Inversiones', 'monto': '150'}
-        ]
-        
-        # Convierte los montos a cadenas para la comparación
-        response_data = [
-            {'origen': ingreso['origen'], 'monto': str(ingreso['total'])}
-            for ingreso in response.data
-        ]
-        
-        # Ordenar la respuesta y el esperado para facilitar la comparación
-        self.assertEqual(sorted(response_data, key=lambda x: x['origen']),
-                         sorted(expected_data, key=lambda x: x['origen']))
-        
+        ingresos_usuario = self.servicio_ingreso.obtener_ingresos_usuario(self.usuario)
+        cant = len(ingresos_usuario)  # Obtengo la cantidad total de ingresos
+        self.assertEqual(cant, 4)
+        self.assertNotEqual(cant, -1)
+        self.assertNotEqual(cant, 999999)
+
     def test_obtener_ingresos_totales(self):
-        url = reverse('ingresos-totales', args=[self.usuario.id])        
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        total_ingresos = self.servicio_ingreso.obtener_ingresos_totales(self.usuario)
+        self.assertEqual(total_ingresos["total"], Decimal("550"))
+        self.assertNotEqual(total_ingresos["total"], Decimal("-999"))
+        self.assertNotEqual(total_ingresos["total"], Decimal("0"))
 
-        # Verifica que el total de ingresos devuelto sea correcto con sus valores borde
-        total_ingresos_esperado = str(Decimal('300')) 
-        total_ingresos_cero = str(Decimal('0'))
-        total_ingresos_negativos = str(Decimal('-1'))
-        self.assertEqual(str(response.data['total']), total_ingresos_esperado)
-        self.assertNotEqual(str(response.data['total']),total_ingresos_cero)
-        self.assertNotEqual(str(response.data['total']),total_ingresos_negativos)
+    def test_obtener_ingresos_de_un_mes(self):
+        ingresos = self.servicio_ingreso.obtener_ingresos_de_un_mes(
+            self.usuario, 4, 2024
+        )
+        cant = len(ingresos)
+        self.assertEqual(cant, 2)
+        self.assertNotEqual(cant, -1)
+        self.assertNotEqual(cant, 999999)
 
-    def test_obtener_ingresos_por_anio(self):
-        url = reverse('ingresos-por-anio', kwargs={'usuario_id': self.usuario.id, 'anio': 2024})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ingreso = ingresos[0]
+        self.assertEqual(ingreso.monto, Decimal("100"))
+        self.assertEqual(ingreso.origen, "Trabajo")
 
-        self.assertNotEqual(str(response.data[0]['total']), str(Decimal('-1')))
-        self.assertEqual(str(response.data[0]['total']), str(Decimal('250.00')))
+        ingreso = ingresos[1]
+        self.assertEqual(ingreso.monto, Decimal("150"))
+        self.assertEqual(ingreso.origen, "Colaborador")
 
-    def test_obtener_ingresos_por_mes(self):
-        url = reverse('ingresos-por-mes', kwargs={'usuario_id': self.usuario.id, 'mes': 4})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_obtener_ingresos_de_un_anio(self):
+        ingresos = self.servicio_ingreso.obtener_ingresos_de_un_anio(self.usuario, 2024)
+        cant = len(ingresos)
+        self.assertEqual(cant, 3)
+        self.assertNotEqual(cant, -1)
+        self.assertNotEqual(cant, 999999)
 
-        self.assertEqual(response.data[0]['mes'], 'April')
-        self.assertNotEqual(str(response.data[0]['total']), str(Decimal('-1')))
-        self.assertEqual(str(response.data[0]['total']), str(Decimal('150.00')))
+        ingreso = ingresos[0]
+        self.assertEqual(ingreso.monto, Decimal("100"))
+        self.assertEqual(ingreso.origen, "Trabajo")
+
+        ingreso = ingresos[1]
+        self.assertEqual(ingreso.monto, Decimal("150"))
+        self.assertEqual(ingreso.origen, "Youtube")
+
+        ingreso = ingresos[2]
+        self.assertEqual(ingreso.monto, Decimal("150"))
+        self.assertEqual(ingreso.origen, "Colaborador")
+
+    def test_obtener_ingreso_total_en_un_anio(self):
+        ingresos_2024 = self.servicio_ingreso.obtener_ingreso_total_en_un_anio(
+            self.usuario, 2024
+        )
+        self.assertEqual(ingresos_2024, {2024: Decimal("400")})
+        self.assertNotEqual(ingresos_2024, {2024: Decimal("-999")})
+        self.assertNotEqual(ingresos_2024, {2024: Decimal("0")})
+
+    def test_obtener_ingreso_total_en_un_mes(self):
+        ingresos_abril = self.servicio_ingreso.obtener_ingreso_total_en_un_mes(
+            self.usuario, 4, 2023
+        )
+        self.assertEqual(ingresos_abril, {4: Decimal("150")})
+        self.assertNotEqual(ingresos_abril, {4: Decimal("-999")})
+        self.assertNotEqual(ingresos_abril, {4: Decimal("0")})
