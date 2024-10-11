@@ -178,22 +178,22 @@ ACCOUNT_LOGIN_BY_CODE_ENABLED = True
 # HEADLESS_ONLY = True
 
 # URLs
-LOGIN_URL = "auth/login/"
+LOGIN_URL = "https://igrowker-youcreate.web.app/auth/login/"
 FRONTEND_URL = "https://igrowker-youcreate.web.app/auth/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    # },
     {
         "NAME": "Usuario.auth_backend.CustomPasswordValidator",
     },
