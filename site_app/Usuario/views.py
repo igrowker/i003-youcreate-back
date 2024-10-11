@@ -108,7 +108,7 @@ class TwoFAVerifyView(APIView):
         otp_code = request.data.get("otp_code")
 
         # Obtener el email de la sesión
-        email = request.session.get("email")
+        email = request.data.get("email")
 
         # Verificar si hay un email en la sesión
         if not email:
