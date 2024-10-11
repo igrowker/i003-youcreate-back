@@ -24,7 +24,7 @@ class CustomUser(AbstractUser):
 
     # Crea los campos adicionales usados para la autenticación con OTP/2FA
     is_mfa_enabled = models.BooleanField(default=True)
-    otp_secret = models.CharField(max_length=16, blank=True, null=True, default=None)
+    otp_secret = models.CharField(max_length=32, blank=True, null=True, default=None)
 
     # Añade un campo para el rol del usuario
     role = models.CharField(
@@ -43,17 +43,17 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    # def generate_otp_secret(self):
-    #     self.otp_secret = pyotp.random_base32()  # Generar secreto OTP
-    #     self.save()
-    #
-    # # Cambiar el valor intervalo a lo que necesites, e.g., 60
-    # def get_otp_code(self, interval=120):
-    #     if not self.otp_secret:  # Si no tiene secreto, no puede obtener el código OTP
-    #         self.generate_otp_secret()
-    #     # Crear TOTP con el secreto
-    #     totp = pyotp.TOTP(self.otp_secret, interval=interval)
-    #     return totp.now()  # Obtener el código OTP
+    def generate_otp_secret(self):
+        self.otp_secret = pyotp.random_base32()  # Generar secreto OTP
+        self.save()
+
+    # Cambiar el valor intervalo a lo que necesites, e.g., 60
+    def get_otp_code(self, interval=120):
+        if not self.otp_secret or len(self.otp_secret) < 6:  # Si no tiene secreto, no puede obtener el código OTP
+            self.generate_otp_secret()
+        # Crear TOTP con el secreto
+        totp = pyotp.TOTP(self.otp_secret, interval=interval)
+        return totp.now()  # Obtener el código OTP
 
     class Meta:
         db_table = "auth_user"
