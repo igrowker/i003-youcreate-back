@@ -95,7 +95,7 @@ class TwoFALoginView(APIView):
         # Aquí es donde generamos el token JWT o sesión
         token = CustomTokenObtainPairSerializer.get_token(user)
         return Response(
-            {"token": str(token.access_token), "refresh": str(token)},
+            {"token": str(token), "refresh": str(token)},
             status=status.HTTP_200_OK,
         )
 
