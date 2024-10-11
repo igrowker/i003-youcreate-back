@@ -38,10 +38,10 @@ class CustomConfirmEmailView(ConfirmEmailView):
             confirmation = EmailConfirmationHMAC.from_key(key)
             confirmation.confirm(request)
             # Redirect to the Angular login page with a success message
-            return HttpResponseRedirect(f"{FRONTEND_URL}?email_confirmed=true")
+            return HttpResponseRedirect(f"{FRONTEND_URL}")
         except EmailConfirmation.DoesNotExist:
             # Handle error and redirect to an error page or frontend login with error message
-            return HttpResponseRedirect(f"{FRONTEND_URL}?email_confirmed=false")
+            return HttpResponseRedirect(f"{FRONTEND_URL}")
 
 
 class AccountDataView(APIView):
@@ -87,7 +87,7 @@ class TwoFALoginView(APIView):
             send_otp_via_email(user)
             return Response(
                 {"detail": "2FA requerido. Se ha enviado un código a tu correo."},
-                status=status.HTTP_200_OK,
+                status=status.HTTP_202_ACCEPTED,
             )
 
         # Si no se requiere 2FA, generar el token directamente
@@ -95,7 +95,7 @@ class TwoFALoginView(APIView):
         # Aquí es donde generamos el token JWT o sesión
         token = CustomTokenObtainPairSerializer.get_token(user)
         return Response(
-            {"token": str(token.access_token), "refresh": str(token)},
+            {"token": str(token), "refresh": str(token)},
             status=status.HTTP_200_OK,
         )
 
