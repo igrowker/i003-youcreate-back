@@ -185,7 +185,7 @@ ACCOUNT_LOGIN_BY_CODE_ENABLED = True
 
 # URLs
 LOGIN_URL = "auth/login/"
-FRONTEND_URL = "http://localhost:4200/auth/login/"
+FRONTEND_URL = "https://igrowker-youcreate.web.app/auth/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
