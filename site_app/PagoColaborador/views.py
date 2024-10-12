@@ -1,17 +1,21 @@
+from decimal import Decimal
+
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from .models import PagoColaborador
 from .serializers import PagoColaboradorSerializer
 from .services import PagosColaboradoresService
-from Colaborador.models import Colaborador
+
 
 class PagoColaboradorPagination(PageNumberPagination):
     page_size = 10
 
+
 class PagoColaboradorViewSet(viewsets.ModelViewSet):
-    queryset = PagoColaborador.objects.all().order_by('id')
+    queryset = PagoColaborador.objects.all().order_by("id")
     serializer_class = PagoColaboradorSerializer
     pagination_class = PagoColaboradorPagination
     permission_classes = [IsAuthenticated]
@@ -20,13 +24,13 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
         data = request.data
         try:
             pago = PagosColaboradoresService.registrar_pago(
-                colaborador_id=data['colaborador_id'],
-                nombre=data['nombre'],
-                apellido=data['apellido'],
-                monto=data['monto'],
-                fecha_pago=data['fecha_pago'],
-                descripcion=data['descripcion'],
-                metodo_pago=data['metodo_pago']
+                colaborador_id=data["colaborador_id"],
+                nombre=data["nombre"],
+                apellido=data["apellido"],
+                monto=data["monto"],
+                fecha_pago=data["fecha_pago"],
+                descripcion=data["descripcion"],
+                metodo_pago=data["metodo_pago"],
             )
             serializer = self.get_serializer(pago)
             return Response(serializer.data, status=201)
@@ -46,24 +50,24 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(pagos, many=True)
         return Response(serializer.data)
 
-def update(self, request, *args, **kwargs):
-    pago_id = self.kwargs.get('pk')
-    try:
-        if 'monto' in request.data:
-            request.data['monto'] = Decimal(request.data['monto'])
+    def update(self, request, *args, **kwargs):
+        pago_id = self.kwargs.get("pk")
+        try:
+            if "monto" in request.data:
+                request.data["monto"] = Decimal(request.data["monto"])
 
-        pago = PagosColaboradoresService.actualizar_pago(pago_id, **request.data)
-        if pago is not None:
-            serializer = self.get_serializer(pago)
-            return Response(serializer.data)
-        return Response({"detail": "Pago no encontrado."}, status=404)
-    except ValueError as e:
-        return Response({"detail": str(e)}, status=400)
-    except Exception as e:
-        return Response({"detail": str(e)}, status=400)
+            pago = PagosColaboradoresService.actualizar_pago(pago_id, **request.data)
+            if pago is not None:
+                serializer = self.get_serializer(pago)
+                return Response(serializer.data)
+            return Response({"detail": "Pago no encontrado."}, status=404)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=400)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=400)
 
     def destroy(self, request, *args, **kwargs):
-        pago_id = self.kwargs.get('pk')
+        pago_id = self.kwargs.get("pk")
         if PagosColaboradoresService.eliminar_pago(pago_id):
-            return Response(status=204) 
+            return Response(status=204)
         return Response({"detail": "Pago no encontrado."}, status=404)

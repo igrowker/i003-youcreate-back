@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from .models import Ingreso
 from .repository import IngresosRepository
@@ -6,11 +6,21 @@ from .repository import IngresosRepository
 
 # Servicio que va ser utilizado por el controlador
 class IngresosService:
-    def crear_ingreso(self, usuario_id, monto, origen, fecha=None):
+    def crear_ingreso(
+        self, usuario_id, monto, origen, categoria, descripcion="", fecha=None
+    ):
         if fecha is None:
             fecha = date.today()
+        else:
+            fecha = datetime.strptime(fecha, "%d/%m/%Y").strftime("%Y-%m-%d")
+
         nuevo_ingreso = Ingreso(
-            usuario_id=usuario_id, monto=monto, origen=origen, fecha=fecha
+            usuario_id=usuario_id,
+            monto=monto,
+            origen=origen,
+            fecha=fecha,
+            categoria=categoria,
+            descripcion=descripcion,
         )
         return IngresosRepository.guardar_ingreso(nuevo_ingreso)
 

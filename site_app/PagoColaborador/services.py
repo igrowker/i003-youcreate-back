@@ -1,10 +1,12 @@
-from .models import PagoColaborador
 from Colaborador.models import Colaborador
+from .models import PagoColaborador
+
 
 class PagosColaboradoresService:
-
     @staticmethod
-    def registrar_pago(colaborador_id, nombre, apellido, monto, fecha_pago, descripcion, metodo_pago):
+    def registrar_pago(
+        colaborador_id, nombre, apellido, monto, fecha_pago, descripcion, metodo_pago
+    ):
         try:
             colaborador = Colaborador.objects.get(id=colaborador_id)
         except Colaborador.DoesNotExist:
@@ -13,17 +15,25 @@ class PagosColaboradoresService:
         pago = PagoColaborador(
             colaborador_id=colaborador,
             nombre=nombre,
-            apellido=apellido,  
+            apellido=apellido,
             monto=monto,
             fecha_pago=fecha_pago,
             descripcion=descripcion,
-            metodo_pago=metodo_pago  
+            metodo_pago=metodo_pago,
         )
         pago.save()
         return pago
 
     @staticmethod
-    def actualizar_pago(pago_id, nombre=None, apellido=None, monto=None, fecha_pago=None, descripcion=None, metodo_pago=None):
+    def actualizar_pago(
+        pago_id,
+        nombre=None,
+        apellido=None,
+        monto=None,
+        fecha_pago=None,
+        descripcion=None,
+        metodo_pago=None,
+    ):
         try:
             pago = PagoColaborador.objects.get(id=pago_id)
             if nombre is not None:
@@ -45,7 +55,9 @@ class PagosColaboradoresService:
 
     @staticmethod
     def obtener_historial_pagos(colaborador_id):
-        return PagoColaborador.objects.filter(colaborador_id=colaborador_id).order_by('-fecha_pago')
+        return PagoColaborador.objects.filter(colaborador_id=colaborador_id).order_by(
+            "-fecha_pago"
+        )
 
     @staticmethod
     def eliminar_pago(pago_id):

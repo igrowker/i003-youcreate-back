@@ -153,7 +153,6 @@ DATABASES = {
     #     "ENGINE": "django.db.backends.sqlite3",
     #     "NAME": BASE_DIR / "db.sqlite3",
     # }
-
     # DEFAULT para producción
     "default": dj_database_url.config(
         default="postgresql://postgres:Admin0000@localhost:5432/you_create_db",
@@ -207,7 +206,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "es"
 
 TIME_ZONE = "UTC"
 
