@@ -8,6 +8,7 @@ ENV/
 # Archivos y directorios de Python compilados
 *.pyc
 __pycache__/
+.ruff_cache
 
 # Archivos y carpetas ocultos de macOS y Unix
 .DS_Store

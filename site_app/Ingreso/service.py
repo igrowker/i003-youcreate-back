@@ -11,8 +11,6 @@ class IngresosService:
     ):
         if fecha is None:
             fecha = date.today()
-        else:
-            fecha = datetime.strptime(fecha, "%d/%m/%Y").strftime("%Y-%m-%d")
 
         nuevo_ingreso = Ingreso(
             usuario_id=usuario_id,
