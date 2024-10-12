@@ -49,7 +49,9 @@ class CustomUser(AbstractUser):
 
     # Cambiar el valor intervalo a lo que necesites, e.g., 60
     def get_otp_code(self, interval=120):
-        if not self.otp_secret or len(self.otp_secret) < 6:  # Si no tiene secreto, no puede obtener el código OTP
+        if (
+            not self.otp_secret or len(self.otp_secret) < 6
+        ):  # Si no tiene secreto, no puede obtener el código OTP
             self.generate_otp_secret()
         # Crear TOTP con el secreto
         totp = pyotp.TOTP(self.otp_secret, interval=interval)

@@ -161,6 +161,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
     """
 
+    # Validación para asegurar que el correo sea único (si es necesario cambiar el correo)
+    def validate_email(self, value):
+        user = self.context["request"].user
+        if CustomUser.objects.exclude(id=user.id).filter(email=value).exists():
+            raise serializers.ValidationError("Este correo ya está en uso.")
+        return value
+
     class Meta:
         model = CustomUser
         fields = [
@@ -171,13 +178,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "pais_residencia",
             "redes_sociales",
         ]
-
-    # Validación para asegurar que el correo sea único (si es necesario cambiar el correo)
-    def validate_email(self, value):
-        user = self.context["request"].user
-        if CustomUser.objects.exclude(id=user.id).filter(email=value).exists():
-            raise serializers.ValidationError("Este correo ya está en uso.")
-        return value
 
 
 class UserDataSerializer(serializers.ModelSerializer):
