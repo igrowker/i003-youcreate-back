@@ -1,37 +1,38 @@
-from Colaborador.models import Colaborador
-from .models import PagoColaborador
-from Colaborador.views import ColaboradorViewSet 
-from django.http import Request
 from django.contrib.auth import get_user
+
+from Colaborador.models import Colaborador
+from Colaborador.views import ColaboradorViewSet
+from .models import PagoColaborador
 
 
 class PagosColaboradoresService:
-    @staticmethod
     def registrar_pago(
-        request, colaborador_id, nombre, monto, fecha_pago, descripcion, metodo_pago
+        self,
+        request,
+        colaborador_id,
+        nombre,
+        monto,
+        fecha_pago,
+        descripcion,
+        metodo_pago,
     ):
-        
-        user = get_user(request)
-        name = user.nombre 
+        user = request.user
+        name = user.nombre
 
-        try:
-            colaborador = Colaborador.objects.get(id=colaborador_id)
-        except Colaborador.DoesNotExist:
+        # colaborador = Colaborador.objects.get(id=colaborador_id)
+        # Si no existe el colaborador, lo crea
+        if not Colaborador.objects.get(id=colaborador_id):
             colaborador_data = {
-                "id": colaborador_id,
+                # "id": colaborador_id, # ID es creado por la BD
                 "nombre": name,
+                "usuario": user,
             }
-            colaborador_view = ColaboradorViewSet.as_view({'post': 'create'})
-            simulated_request = Request(data=colaborador_data, method='POST', user=user)
 
-            response = colaborador_view(simulated_request)
+            # Crea el nuevo colaborador y lo asigna como el colaborador para el pago
+            nuevo_colaborador = self.crear_colaborador(colaborador_data)
+            print("nuevo colaborador", nuevo_colaborador)
+            colaborador = nuevo_colaborador
 
-            #if response.status_code != status.HTTP_201_CREATED:
-           #     raise ValueError("No se pudo crear el colaborador")
-
-            colaborador = Colaborador.objects.get(id=colaborador_id)
-
-            
         pago = PagoColaborador(
             colaborador_id=colaborador,
             nombre=nombre,
@@ -43,7 +44,14 @@ class PagosColaboradoresService:
         pago.save()
         return pago
 
-    @staticmethod
+        # colaborador_view = ColaboradorViewSet.as_view({'post': 'create'})
+        # simulated_request = Request(data=colaborador_data, method='POST', user=user) # No funciona
+
+        # response = colaborador_view(simulated_request)
+
+        # if response.status_code != status.HTTP_201_CREATED:
+        #     raise ValueError("No se pudo crear el colaborador")
+
     def actualizar_pago(
         pago_id,
         nombre=None,
@@ -69,13 +77,11 @@ class PagosColaboradoresService:
         except PagoColaborador.DoesNotExist:
             return None
 
-    @staticmethod
     def obtener_historial_pagos(colaborador_id):
         return PagoColaborador.objects.filter(colaborador_id=colaborador_id).order_by(
             "-fecha_pago"
         )
 
-    @staticmethod
     def eliminar_pago(pago_id):
         try:
             pago = PagoColaborador.objects.get(id=pago_id)
@@ -83,3 +89,6 @@ class PagosColaboradoresService:
             return True
         except PagoColaborador.DoesNotExist:
             return False
+
+    def crear_colaborador(colaborador_data):
+        ColaboradorViewSet.create(request=colaborador_data)

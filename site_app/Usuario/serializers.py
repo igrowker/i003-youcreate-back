@@ -158,7 +158,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     """
-    El serializador usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
+    El serializer usa el contexto (self.context['request']) para obtener el usuario actual al validar el correo electrónico y evitar que se asigne un correo duplicado a otro usuario.
     """
 
     # Validación para asegurar que el correo sea único (si es necesario cambiar el correo)
