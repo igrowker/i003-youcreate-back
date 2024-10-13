@@ -26,7 +26,6 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
             pago = PagosColaboradoresService.registrar_pago(
                 colaborador_id=data["colaborador_id"],
                 nombre=data["nombre"],
-                apellido=data["apellido"],
                 monto=data["monto"],
                 fecha_pago=data["fecha_pago"],
                 descripcion=data["descripcion"],

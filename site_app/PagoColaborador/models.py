@@ -14,4 +14,4 @@ class PagoColaborador(models.Model):
     metodo_pago = models.CharField(max_length=80)
 
     def __str__(self):
-        return f"{self.colaborador_id} - {self.colaborador_id.nombre} - - {self.nombre} - {self.apellido} - {self.fecha_pago} - {self.monto} - {self.metodo_pago}"
+        return f"{self.colaborador_id} - {self.colaborador_id.nombre} - {self.nombre} - {self.apellido} - {self.fecha_pago} - {self.monto} - {self.metodo_pago}"

@@ -1,21 +1,34 @@
 from Colaborador.models import Colaborador
 from .models import PagoColaborador
-
+from Colaborador.views import ColaboradorViewSet 
 
 class PagosColaboradoresService:
     @staticmethod
     def registrar_pago(
-        colaborador_id, nombre, apellido, monto, fecha_pago, descripcion, metodo_pago
+        colaborador_id, nombre, monto, fecha_pago, descripcion, metodo_pago
     ):
         try:
             colaborador = Colaborador.objects.get(id=colaborador_id)
         except Colaborador.DoesNotExist:
-            raise ValueError("El colaborador no existe")
+            colaborador_data = {
+                "id": colaborador_id,
+                "nombre": nombre,
+            }
+            colaborador_view = ColaboradorViewSet.as_view({'post': 'create'})
 
+            simulated_request = Request(data=colaborador_data, method='POST', user=request.user)
+
+            response = colaborador_view(simulated_request)
+
+            if response.status_code != status.HTTP_201_CREATED:
+                raise ValueError("No se pudo crear el colaborador")
+
+            colaborador = Colaborador.objects.get(id=colaborador_id)
+
+            
         pago = PagoColaborador(
             colaborador_id=colaborador,
             nombre=nombre,
-            apellido=apellido,
             monto=monto,
             fecha_pago=fecha_pago,
             descripcion=descripcion,
@@ -28,7 +41,6 @@ class PagosColaboradoresService:
     def actualizar_pago(
         pago_id,
         nombre=None,
-        apellido=None,
         monto=None,
         fecha_pago=None,
         descripcion=None,
@@ -38,8 +50,6 @@ class PagosColaboradoresService:
             pago = PagoColaborador.objects.get(id=pago_id)
             if nombre is not None:
                 pago.nombre = nombre
-            if apellido is not None:
-                pago.apellido = apellido
             if monto is not None:
                 pago.monto = monto
             if fecha_pago is not None:
