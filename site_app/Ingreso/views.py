@@ -3,9 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import (
     APIView,
-)  # Para crear vistas basadas en clases y definir metodos HTTP
+)  # Para crear vistas basadas en clases y definir métodos HTTP
 
-from .serializers import IngresoSerializer
+from .serializers import IngresoSerializer, CrearIngresosSerializer
 from .service import IngresosService
 
 
@@ -17,16 +17,20 @@ class CrearIngresoView(APIView):
         self.ingresos_service = IngresosService()
 
     def post(self, request):
-        usuario_id = request.user
-        monto = request.data.get("monto")
-        origen = request.data.get("origen")
-        fecha = request.data.get("fecha", None)  # Opcional
-        categoria = request.data.get("categoria")
-        descripcion = request.data.get("descripcion")
+        serializer = CrearIngresosSerializer(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            validated_data = serializer.validated_data
+
+            monto = validated_data.get("monto")
+            origen = validated_data.get("origen")
+            fecha = validated_data.get("fecha")
+            categoria = validated_data.get("categoria")
+            descripcion = validated_data.get("descripcion")
 
         # Llamar al servicio para crear el ingreso
         ingreso = self.ingresos_service.crear_ingreso(
-            usuario_id=usuario_id,
+            usuario_id=request.user,
             monto=monto,
             origen=origen,
             categoria=categoria,
@@ -47,6 +51,8 @@ class CrearIngresoView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class IngresosView(APIView):
