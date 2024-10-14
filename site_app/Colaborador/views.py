@@ -13,7 +13,6 @@ class ColaboradorViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         colaborador_data = request.data
-        # TODO: "nombre" del colaborador es el nombre del usuario, cambiar para el nombre del pago
         colaborador = crear_colaborador(colaborador_data, request.user, context={"request": request})
         return Response(
             ColaboradorSerializer(colaborador).data,
