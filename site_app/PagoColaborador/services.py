@@ -19,9 +19,9 @@ class PagosColaboradoresService:
         user = request.user
         name = user.nombre
 
-        colaborador = Colaborador.objects.get(id=colaborador_id)
+        colaborador = Colaborador.objects.filter(id=colaborador_id).first()
         # Si no existe el colaborador, lo crea
-        if not Colaborador.objects.get(id=colaborador_id):
+        if colaborador is None:
             colaborador_data = {
                 # "id": colaborador_id, # ID es creado por la BD
                 "nombre": name,
