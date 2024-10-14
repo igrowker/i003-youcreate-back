@@ -1,21 +1,41 @@
+from django.contrib.auth import get_user
+
 from Colaborador.models import Colaborador
+from Colaborador.views import crear_colaborador
 from .models import PagoColaborador
 
 
 class PagosColaboradoresService:
-    @staticmethod
     def registrar_pago(
-        colaborador_id, nombre, apellido, monto, fecha_pago, descripcion, metodo_pago
+        self,
+        request,
+        colaborador_id,
+        nombre,
+        monto,
+        fecha_pago,
+        descripcion,
+        metodo_pago,
     ):
-        try:
-            colaborador = Colaborador.objects.get(id=colaborador_id)
-        except Colaborador.DoesNotExist:
-            raise ValueError("El colaborador no existe")
+        user = request.user
+        name = user.nombre
+
+        colaborador = Colaborador.objects.filter(id=colaborador_id).first()
+        # Si no existe el colaborador, lo crea
+        if colaborador is None:
+            colaborador_data = {
+                # "id": colaborador_id, # ID es creado por la BD
+                "nombre": name,
+                "usuario": user,
+            }
+
+            # Crea el nuevo colaborador y lo asigna como el colaborador para el pago
+            nuevo_colaborador = crear_colaborador(colaborador_data, request.user, context={"request": request})
+            print("nuevo colaborador", nuevo_colaborador)
+            colaborador = nuevo_colaborador
 
         pago = PagoColaborador(
             colaborador_id=colaborador,
             nombre=nombre,
-            apellido=apellido,
             monto=monto,
             fecha_pago=fecha_pago,
             descripcion=descripcion,
@@ -24,11 +44,9 @@ class PagosColaboradoresService:
         pago.save()
         return pago
 
-    @staticmethod
     def actualizar_pago(
         pago_id,
         nombre=None,
-        apellido=None,
         monto=None,
         fecha_pago=None,
         descripcion=None,
@@ -38,8 +56,6 @@ class PagosColaboradoresService:
             pago = PagoColaborador.objects.get(id=pago_id)
             if nombre is not None:
                 pago.nombre = nombre
-            if apellido is not None:
-                pago.apellido = apellido
             if monto is not None:
                 pago.monto = monto
             if fecha_pago is not None:
@@ -53,13 +69,11 @@ class PagosColaboradoresService:
         except PagoColaborador.DoesNotExist:
             return None
 
-    @staticmethod
     def obtener_historial_pagos(colaborador_id):
         return PagoColaborador.objects.filter(colaborador_id=colaborador_id).order_by(
             "-fecha_pago"
         )
 
-    @staticmethod
     def eliminar_pago(pago_id):
         try:
             pago = PagoColaborador.objects.get(id=pago_id)

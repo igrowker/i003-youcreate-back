@@ -22,11 +22,13 @@ class PagoColaboradorViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data
+
         try:
             pago = PagosColaboradoresService.registrar_pago(
+                self,
+                request=request,
                 colaborador_id=data["colaborador_id"],
                 nombre=data["nombre"],
-                apellido=data["apellido"],
                 monto=data["monto"],
                 fecha_pago=data["fecha_pago"],
                 descripcion=data["descripcion"],

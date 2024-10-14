@@ -68,6 +68,7 @@ class UserUpdateView(APIView):
         serializer = UserUpdateSerializer(
             user, data=request.data, partial=True, context={"request": request}
         )
+        print(serializer)
 
         if serializer.is_valid():
             serializer.save()
