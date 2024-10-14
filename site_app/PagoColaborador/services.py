@@ -17,7 +17,7 @@ class PagosColaboradoresService:
         metodo_pago,
     ):
         user = request.user
-        name = user.nombre
+        name = nombre
 
         colaborador = Colaborador.objects.filter(id=colaborador_id).first()
         # Si no existe el colaborador, lo crea
