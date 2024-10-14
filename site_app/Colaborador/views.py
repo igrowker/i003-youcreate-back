@@ -1,26 +1,20 @@
-from rest_framework import viewsets
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-
 from .models import Colaborador
 from .serializers import ColaboradorSerializer
+from .services import crear_colaborador
 
-
-class ColaboradorViewSet(viewsets.ModelViewSet):
+class ColaboradorViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Colaborador.objects.all()
     serializer_class = ColaboradorSerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+        colaborador_data = request.data
+        colaborador = crear_colaborador(colaborador_data, request.user, context={"request": request})
         return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            ColaboradorSerializer(colaborador).data,
+            status=status.HTTP_201_CREATED
         )
-
-    def get_serializer_context(self):
-        return {"request": self.request}
-
-    def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)

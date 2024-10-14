@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user
 
 from Colaborador.models import Colaborador
-from Colaborador.views import ColaboradorViewSet
+from Colaborador.views import crear_colaborador
 from .models import PagoColaborador
 
 
@@ -29,7 +29,7 @@ class PagosColaboradoresService:
             }
 
             # Crea el nuevo colaborador y lo asigna como el colaborador para el pago
-            nuevo_colaborador = self.crear_colaborador(colaborador_data)
+            nuevo_colaborador = crear_colaborador(colaborador_data, request.user, context={"request": request})
             print("nuevo colaborador", nuevo_colaborador)
             colaborador = nuevo_colaborador
 
@@ -43,14 +43,6 @@ class PagosColaboradoresService:
         )
         pago.save()
         return pago
-
-        # colaborador_view = ColaboradorViewSet.as_view({'post': 'create'})
-        # simulated_request = Request(data=colaborador_data, method='POST', user=user) # No funciona
-
-        # response = colaborador_view(simulated_request)
-
-        # if response.status_code != status.HTTP_201_CREATED:
-        #     raise ValueError("No se pudo crear el colaborador")
 
     def actualizar_pago(
         pago_id,
@@ -89,6 +81,3 @@ class PagosColaboradoresService:
             return True
         except PagoColaborador.DoesNotExist:
             return False
-
-    def crear_colaborador(colaborador_data):
-        ColaboradorViewSet.create(request=colaborador_data)
